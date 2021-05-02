@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from time import time
 import datetime
 import csv
 import pandas as pd
@@ -8,9 +7,6 @@ import robin_stocks as r  # package name differs with version
 
 # local imports
 import config
-
-# Begin timing of script response time
-tic = time()
 
 # Login to Robinhood
 r.login(config.ROBINHOOD_EMAIL, config.ROBINHOOD_PASSWORD)
@@ -25,7 +21,6 @@ ap.add_argument('-stockinfo', '--stock_info', nargs=1, metavar=['TICKER'],
 # Parse user arguments
 args = vars(ap.parse_args())
 print(f'args --- {args}\n')
-
 
 
 
@@ -61,15 +56,6 @@ if args['stock_info']:
 	data['RVOL'] = round(data['volume'] / data['average_volume'], 2)
 	data['RVOL_2_weeks'] = round(data['volume'] / data['average_volume_2_weeks'], 2)
 
-
 	# Print Data 
 	for k,v in data.items():
 		print(f'{k:<25}{v}')
-
-
-
-
-
-
-
-
