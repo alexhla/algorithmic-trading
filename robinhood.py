@@ -15,18 +15,26 @@ r.login(config.ROBINHOOD_EMAIL, config.ROBINHOOD_PASSWORD)
 ap = ArgumentParser()
 
 # Add the arguments to the parser
-ap.add_argument('-stockinfo', '--stock_info', nargs=1, metavar=['TICKER'],
-	help='Prints account information to terminal')
+ap.add_argument('-i', '--info', nargs=1, metavar=['TICKER'],
+	help='')
+
+ap.add_argument('-w', '--window', nargs=3, metavar=['TICKER', 'START_DATE', 'END_DATE'],
+	help='')
 
 # Parse user arguments
 args = vars(ap.parse_args())
 print(f'args --- {args}\n')
 
+if args['window']:
+	print('Hello World')
+	pass
 
 
-if args['stock_info']:
 
-	ticker = args['stock_info'][0]
+
+if args['info']:
+
+	ticker = args['info'][0]
 	data = {'ticker':ticker}
 
 	# Get Stock Exchange MIC Code
