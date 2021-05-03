@@ -1,9 +1,10 @@
 from argparse import ArgumentParser
-import datetime
-import csv
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 import pandas as pd
-import robin_stocks as r  # package name differs with version
-# import robin_stocks.robinhood as r
+
+# import robin_stocks as r  # package name differs with version
+import robin_stocks.robinhood as r
 
 # local imports
 import config
@@ -15,30 +16,60 @@ r.login(config.ROBINHOOD_EMAIL, config.ROBINHOOD_PASSWORD)
 ap = ArgumentParser()
 
 # Add the arguments to the parser
-ap.add_argument('-i', '--info', nargs=1, metavar=['TICKER'],
+ap.add_argument('-i', '--info', nargs='+', metavar=['TICKERS'],
 	help='')
 
-ap.add_argument('-w', '--window', nargs=3, metavar=['TICKER', 'START_DATE', 'END_DATE'],
+ap.add_argument('-rvol', '--relative_volume_scanner', nargs=1, metavar=['INTERVAL'],
 	help='')
 
 # Parse user arguments
 args = vars(ap.parse_args())
 print(f'args --- {args}\n')
 
-if args['window']:
-	print('Hello World')
-	pass
+if args['relative_volume_scanner']:
+
+	def animate(i):
+		fundementals = r.stocks.get_fundamentals(tickers)
+		df = pd.DataFrame.from_dict(fundementals)
+		df['rvol'] = df['volume'].astype(float) / df['average_volume'].astype(float)
+		rvol.append(df['rvol'].round(decimals=3).tolist())
+		ax1.clear()
+		ax1.plot(rvol)
+		ax1.set_xticks([])
+		ax1.legend(tickers, bbox_to_anchor=(1.05, 0.5), loc='center')
+		# print(f'ʕ•ᴥ•ʔ Tickers \t {tickers}\n')
+		# print(f'ʕ•ᴥ•ʔ RVOL \t {rvol}\n')
+		# print(dir(ax1))
+
+	interval = int(args['relative_volume_scanner'][0])
+	rvol = []
+	tickers = ['PXS', 'NLSP', 'EVK', 'JOB', 'AEI', 
+			'SEAC', 'CREG', 'AHPI', 'WNW', 'MDRR',
+			'CASI', 'ASTC', 'WIMI', 'EVFM', 'MDLY',
+			'BTX',]
+
+	plt.style.use('seaborn-dark')
+	fig = plt.figure(figsize=(12, 8))
+	fig.canvas.set_window_title(f'RVOL Scanner  |  {interval} Second Interval')
+	ax1 = fig.add_subplot(1,1,1)
+	handle = animation.FuncAnimation(fig, animate, interval=(interval*1000))
+	plt.show()
+
+
+
+
+
 
 
 
 
 if args['info']:
 
-	ticker = args['info'][0]
-	data = {'ticker':ticker}
+	tickers = args['info']
+	data = {'tickers':tickers}
 
 	# Get Stock Exchange MIC Code
-	instrument = r.stocks.find_instrument_data(ticker)
+	instrument = r.stocks.find_instrument_data(tickers)
 	data['stock_exchange'] = instrument[0]['market'].split('/')[-2]
 
 	# Convert MIC Code to Exchange Name
@@ -50,11 +81,11 @@ if args['info']:
 		data['stock_exchange'] = ' '.join((data['stock_exchange'], '(AMEX)'))
 
 	# Get Lastest Trade Price
-	latest_price = r.stocks.get_latest_price(ticker, priceType=None, includeExtendedHours=True)
+	latest_price = r.stocks.get_latest_price(tickers, priceType=None, includeExtendedHours=True)
 	data['latest_price'] = round(float(latest_price[0]), 2)
 
 	# Get Market Cap, Volume, Shares, and Float
-	fundementals = r.stocks.get_fundamentals(ticker)
+	fundementals = r.stocks.get_fundamentals(tickers)
 	df = pd.DataFrame.from_dict(fundementals)
 	for col in df.columns:
 		if any(word in col for word in ['market_cap', 'volume', 'shares', 'float']):
