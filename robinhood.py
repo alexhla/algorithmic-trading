@@ -21,70 +21,12 @@ ap = ArgumentParser()
 ap.add_argument('-i', '--info', nargs='+', metavar=['TICKERS'],
 	help='')
 
-
-ap.add_argument('-rvol', '--rvol_scanner', action='store_true',
-	help='')
-
-ap.add_argument('-v', '--volume_scanner', nargs=1, metavar=['INTERVAL'],
+ap.add_argument('-rvol', '--rvol_scanner', nargs=1, metavar=['INTERVAL'],
 	help='')
 
 # Parse user arguments
 args = vars(ap.parse_args())
 print(f'args --- {args}\n')
-
-
-
-if args['rvol_scanner']:
-
-	tickers = stockdictionary.tickers['microcap_float10M_price10USD']
-	data = {'ticker':tickers}
-	query_size = 100
-	query_list = []
-	rvol = []
-
-	# Build Query List
-	for i in range(0, len(tickers), query_size):
-		query_list.append(tickers[i:i+query_size])
-
-	# Get Volume
-	for q in query_list:
-		fundementals = r.stocks.get_fundamentals(q)
-		df = pd.DataFrame.from_dict(fundementals)
-		for col in df.columns:
-			if 'volume' in col:
-				data.setdefault(col, []).append(df[col].astype(float).tolist())
-	# # Compute RVOL
-	# for i in range(0, len(data['ticker'])):
-	# 	data.setdefault('RVOL', []).append(data['volume'][i] / data['average_volume'][i])
-	# 	data.setdefault('RVOL_2_weeks', []).append(data['volume'][i] / data['average_volume_2_weeks'][i])
-
-	# # Generate List of (Ticker, RVOL) Tuple Pairs for Sorting
-	# for i in range(0, len(data['ticker'])):
-	# 	rvol.append((data['ticker'][i], data['RVOL'][i]))
-	# rvol.sort(key=lambda x:x[1])
-
-
-	# for x in rvol:
-	# 	print(x)
-
-
-	print(f'ʕಠಿᴥಠʔ Tickers are {data["ticker"]} {type(data["ticker"])}\n')
-	# print(f'ʕಠಿᴥಠʔ Ticker Count is {len(data["ticker"])}\n')
-	# print(f'ʕಠಿᴥಠ ʔtytRequest is {request} {type(request)}\n')
-	# print(f'ʕಠಿᴥಠʔ Fundementals are {fundementals} {type(fundementals)}\n')
-	# print(f'ʕಠಿᴥಠʔ Data is {data} {type(data)}\n')
-	print(f'ʕಠಿᴥಠʔ Volume is {data["volume"]} {type(data["volume"])}\n')
-	# print(f'ʕಠಿᴥಠʔ Volume Count is {len(data["volume"])}\n')
-	# print(f'ʕಠಿᴥಠʔ Average Volume is {data["average_volume"]} {type(data["average_volume"])}\n')
-	# print(f'ʕಠಿᴥಠʔ Average Volume Count is {len(data["average_volume"])}\n')
-	# print(f'ʕಠಿᴥಠʔ RVOL is {data["RVOL"]} {type(data["RVOL"])}\n')
-
-	# for key in data:
-	# 	print(f'{key} {len(data[key])}')
-
-	# Wait
-	# time.sleep(60)
-
 
 
 
@@ -120,3 +62,74 @@ if args['info']:
 	# Print Data 
 	for k,v in data.items():
 		print(f'{k:<25}{v}')
+
+
+
+
+if args['rvol_scanner']:
+
+	tickers = stockdictionary.tickers['microcap_float10M_price10USD']
+	interval = int(args['rvol_scanner'][0])
+	data = {}
+	query_size = 100
+	query_list = []
+	rvol = []
+
+	# Build Query List
+	for i in range(0, len(tickers), query_size):
+		query_list.append(tickers[i:i+query_size])
+	data = {'ticker':query_list}
+
+
+	while True:
+		print('\n\nProcuring RVOL...')
+
+		# Get Volume
+		for q in query_list:
+			fundementals = r.stocks.get_fundamentals(q)
+			df = pd.DataFrame.from_dict(fundementals)
+			for col in df.columns:
+				if 'volume' in col:
+					data.setdefault(col, []).append(df[col].astype(float).tolist())
+
+		# Compute RVOL
+		for i in range(0, len(data['ticker'])):
+			current = []
+			for j in range(0, len(data['ticker'][i])):
+				current.append(data['volume'][i][j] / data['average_volume'][i][j])
+			data.setdefault('RVOL', []).append(current)
+
+		# Generate List of (Ticker, RVOL) Tuple Pairs for Sorting
+		rvol = []
+		for i in range(0, len(data['ticker'])):
+			for j in range(0, len(data['ticker'][i])):
+				if data['ticker'][i][j] not in stockdictionary.tickers['blacklist']:
+					rvol.append((data['ticker'][i][j], data['RVOL'][i][j]))
+		rvol.sort(key=lambda x:x[1])
+
+		# Display Results
+		for x in rvol:
+			print(f'{x[0]:<6}{round(x[1],3)}')
+		stdout.write('\n')
+
+		# Debug 
+		# print(f'ʕಠಿᴥಠʔ Tickers are {data["ticker"]} {type(data["ticker"])}\n')
+		# print(f'ʕಠಿᴥಠʔ Ticker Count is {len(data["ticker"])}\n')
+		# print(f'ʕಠಿᴥಠ ʔtytRequest is {request} {type(request)}\n')
+		# print(f'ʕಠಿᴥಠʔ Fundementals are {fundementals} {type(fundementals)}\n')
+		# print(f'ʕಠಿᴥಠʔ Data is {data} {type(data)}\n')
+		# print(f'ʕಠಿᴥಠʔ Volume is {data["volume"]} {type(data["volume"])}\n')
+		# print(f'ʕಠಿᴥಠʔ Volume Count is {len(data["volume"])}\n')
+		# print(f'ʕಠಿᴥಠʔ Average Volume is {data["average_volume"]} {type(data["average_volume"])}\n')
+		# print(f'ʕಠಿᴥಠʔ Average Volume Count is {len(data["average_volume"])}\n')
+		# print(f'ʕಠಿᴥಠʔ RVOL is {data["RVOL"]} {type(data["RVOL"])}\n')
+		# for key in data:
+		# 	print(f'ʕಠಿᴥಠʔ {key} {len(data[key])}')
+
+		# Wait
+		for i in range(0, interval):
+			stdout.write('\r')
+			stdout.write(f'Next Procurement in {interval-i} Seconds...')
+			stdout.flush()
+			time.sleep(1)
+

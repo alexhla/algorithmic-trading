@@ -1,5 +1,12 @@
 tickers = {}
 
+tickers['blacklist'] = [
+
+# Incorrect Average Volume from Robin Hood API
+'NVOS', 'LIXT', 'RZLT', 'ELTK'
+
+]
+
 tickers['microcap_float10M_price10USD'] = [
 
 'AAME', 'ABIO', 'ACOR', 'ACY', 'ADXN', 'AEHL', 'AEI', 'AEY',
@@ -10,7 +17,7 @@ tickers['microcap_float10M_price10USD'] = [
 
 'BBGI', 'BBIG', 'BCAC', 'BCDA', 'BCTX', 'BDR', 'BGI', 'BIMI',
 'BITE', 'BKYI', 'BLCM', 'BLIN', 'BLPH', 'BMRA', 'BMTX', 'BNSO',
-'BNTC', 'BOAS', 'BOSC', 'BPTH', 'BRN', 'BSBK', 'BYFC',
+'BNTC', 'BOSC', 'BPTH', 'BRN', 'BSBK', 'BYFC',
 
 'CAHC', 'CARV', 'CBLI', 'CDOR', 'CELP', 'CHCI', 'CHFW', 'CHNR',
 'CLEU', 'CLPS', 'CLWT', 'CNEY', 'CNFR', 'CNTG', 'CODA', 'CPIX',
