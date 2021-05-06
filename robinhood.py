@@ -1,7 +1,8 @@
 from argparse import ArgumentParser
 from sys import stdout
-import datetime
+from datetime import datetime
 import time
+import csv
 import pandas as pd
 
 #import robin_stocks as r  # package name differs with version
@@ -48,11 +49,13 @@ if args['info']:
 	df = pd.DataFrame.from_dict(fundementals)
 	for col in df.columns:
 		if any(word in col for word in ['market_cap', 'volume', 'shares', 'float']):
-			data[col] = round(float(df[col][0]), 2)
+			try:
+				data[col] = round(float(df[col][0]), 2)
+			except:
+				pass
 
 	# Compute RVOL
 	data['RVOL'] = round(data['volume'] / data['average_volume'], 2)
-	data['RVOL_2_weeks'] = round(data['volume'] / data['average_volume_2_weeks'], 2)
 
 	# Get Volume History
 	# historicals = r.stocks.get_stock_historicals(tickers, interval='5minute', span='week')#, bounds='extended')
@@ -68,68 +71,78 @@ if args['info']:
 
 if args['rvol_scanner']:
 
-	tickers = stockdictionary.tickers['microcap_float10M_price10USD']
 	interval = int(args['rvol_scanner'][0])
-	data = {}
+	selection = 'microcap_float10M_price10USD'
+	tickers = stockdictionary.tickers[selection]
 	query_size = 100
 	query_list = []
-	rvol = []
 
 	# Build Query List
 	for i in range(0, len(tickers), query_size):
 		query_list.append(tickers[i:i+query_size])
-	data = {'ticker':query_list}
 
+	# Init TSV File
+	tsv_filepath  = f'data/{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}-{selection.replace("_", "-")}-interval{interval}.tsv'	
+	with open(tsv_filepath, 'w+') as out_file:
+		tsv_writer = csv.writer(out_file, delimiter='\t')
+		tsv_writer.writerow(tickers)
 
+	# Main Loop
 	while True:
-		print('\n\nProcuring RVOL...')
+		volume = []
+		rvol = []
+		data= []
 
 		# Get Volume
 		for q in query_list:
 			fundementals = r.stocks.get_fundamentals(q)
-			df = pd.DataFrame.from_dict(fundementals)
-			for col in df.columns:
-				if 'volume' in col:
-					data.setdefault(col, []).append(df[col].astype(float).tolist())
+			for f in fundementals:
+				volume.append({key: f[key] for key in f.keys() & {'volume', 'average_volume'}})
 
 		# Compute RVOL
-		for i in range(0, len(data['ticker'])):
-			current = []
-			for j in range(0, len(data['ticker'][i])):
-				current.append(data['volume'][i][j] / data['average_volume'][i][j])
-			data.setdefault('RVOL', []).append(current)
+		df = pd.DataFrame.from_dict(volume)
+		df['RVOL'] = df['volume'].astype(float) / df['average_volume'].astype(float)
+		rvol = df['RVOL'].tolist()
+
+		# Update TSV File
+		with open(tsv_filepath, 'a') as out_file:
+			tsv_writer = csv.writer(out_file, delimiter='\t')
+			tsv_writer.writerow(rvol)
 
 		# Generate List of (Ticker, RVOL) Tuple Pairs for Sorting
-		rvol = []
-		for i in range(0, len(data['ticker'])):
-			for j in range(0, len(data['ticker'][i])):
-				if data['ticker'][i][j] not in stockdictionary.tickers['blacklist']:
-					rvol.append((data['ticker'][i][j], data['RVOL'][i][j]))
-		rvol.sort(key=lambda x:x[1])
+		for i in range(len(tickers)):
+			if tickers[i] not in stockdictionary.tickers['blacklist']:
+				data.append((tickers[i], rvol[i]))
+		data.sort(key=lambda x:x[1])
 
 		# Display Results
-		for x in rvol:
+		for x in data:
 			print(f'{x[0]:<6}{round(x[1],3)}')
 		stdout.write('\n')
 
 		# Debug 
 		# print(f'ʕಠಿᴥಠʔ Tickers are {data["ticker"]} {type(data["ticker"])}\n')
 		# print(f'ʕಠಿᴥಠʔ Ticker Count is {len(data["ticker"])}\n')
-		# print(f'ʕಠಿᴥಠ ʔtytRequest is {request} {type(request)}\n')
+		# print(f'ʕಠಿᴥಠʔ Request is {request} {type(request)}\n')
+		# print(f'ʕಠಿᴥಠʔ df is {df} {type(df)}\n')
 		# print(f'ʕಠಿᴥಠʔ Fundementals are {fundementals} {type(fundementals)}\n')
 		# print(f'ʕಠಿᴥಠʔ Data is {data} {type(data)}\n')
 		# print(f'ʕಠಿᴥಠʔ Volume is {data["volume"]} {type(data["volume"])}\n')
+		# print(f'ʕಠಿᴥಠʔ Volume is {volume} {type(volume)}\n')			
 		# print(f'ʕಠಿᴥಠʔ Volume Count is {len(data["volume"])}\n')
 		# print(f'ʕಠಿᴥಠʔ Average Volume is {data["average_volume"]} {type(data["average_volume"])}\n')
 		# print(f'ʕಠಿᴥಠʔ Average Volume Count is {len(data["average_volume"])}\n')
 		# print(f'ʕಠಿᴥಠʔ RVOL is {data["RVOL"]} {type(data["RVOL"])}\n')
+		# print(f'ʕಠಿᴥಠʔ rvol is {rvol} {type(rvol)}\n')			
 		# for key in data:
 		# 	print(f'ʕಠಿᴥಠʔ {key} {len(data[key])}')
 
 		# Wait
 		for i in range(0, interval):
 			stdout.write('\r')
-			stdout.write(f'Next Procurement in {interval-i} Seconds...')
+			stdout.write(f'Next Procurment in {interval-i} Seconds...')
 			stdout.flush()
 			time.sleep(1)
 
+
+		
