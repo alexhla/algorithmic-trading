@@ -34,38 +34,28 @@ print(f'args --- {args}\n')
 if args['info']:
 
 	tickers = args['info']
-	data = {'tickers':tickers}
+	data = []
 
-	# Get Stock Exchange MIC Code
-	instrument = r.stocks.find_instrument_data(tickers)
-	data['stock_exchange'] = instrument[0]['market'].split('/')[-2]
+	# Get Fundamentals
+	fundementals = r.stocks.get_fundamentals(tickers)
+	for f in fundementals:
+		data.append({key: f[key] for key in f.keys() & {'market_cap', 'shares', 'float', 'volume', 'average_volume'}})
 
 	# Get Lastest Trade Price
 	latest_price = r.stocks.get_latest_price(tickers, priceType=None, includeExtendedHours=True)
-	data['latest_price'] = round(float(latest_price[0]), 2)
 
-	# Get Market Cap, Volume, Shares, and Float
-	fundementals = r.stocks.get_fundamentals(tickers)
-	df = pd.DataFrame.from_dict(fundementals)
-	for col in df.columns:
-		if any(word in col for word in ['market_cap', 'volume', 'shares', 'float']):
-			try:
-				data[col] = round(float(df[col][0]), 2)
-			except:
-				pass
+	# Merge Info into Single Dictionary
+	for i, d in enumerate(data):
+		d['ticker'] = tickers[i]
+		d['latest_price'] = latest_price[i]
 
 	# Compute RVOL
-	data['RVOL'] = round(data['volume'] / data['average_volume'], 2)
+	df = pd.DataFrame.from_dict(data)
+	df['RVOL'] = df['volume'].astype(float) / df['average_volume'].astype(float)
 
-	# Get Volume History
-	# historicals = r.stocks.get_stock_historicals(tickers, interval='5minute', span='week')#, bounds='extended')
-	# for d in historicals:
-	# 	data.setdefault('volume_history', []).append((d['begins_at'], d['volume']))
-
-	# Print Data 
-	for k,v in data.items():
-		print(f'{k:<25}{v}')
-
+	# Display Results
+	for index, row in df.iterrows():
+		print(f'{row}\n')
 
 
 
@@ -138,11 +128,9 @@ if args['rvol_scanner']:
 		# 	print(f'ʕಠಿᴥಠʔ {key} {len(data[key])}')
 
 		# Wait
-		for i in range(0, interval):
+		for i in range(0, interval+1):
 			stdout.write('\r')
-			stdout.write(f'Next Procurment in {interval-i} Seconds...')
+			stdout.write(f'Updating in {interval-i} Seconds...')
 			stdout.flush()
 			time.sleep(1)
-
-
-		
+		print('\n\nWorking...\n')
