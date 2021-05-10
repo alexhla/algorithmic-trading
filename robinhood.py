@@ -97,9 +97,9 @@ if args['rvol_scanner']:
 	timestamp = f'{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}-{selection.replace("_", "-")}'
 	tickers = stockdictionary.tickers[selection]
 	interval = int(args['rvol_scanner'][0])	
-	volume_history_5min_1week = {}
-	volume = []
 	rvol = []
+	volume = []
+	volume_history = {}
 	query_size = 75
 	query_list = []
 	for i in range(0, len(tickers), query_size):
@@ -109,20 +109,20 @@ if args['rvol_scanner']:
 	temp_list = []
 	for i, q in enumerate(query_list):
 		print(f'Requesting Query List {i+1} of {len(query_list)}')
-		historicals = r.stocks.get_stock_historicals(q, interval='5minute', span='week')
+		historicals = r.stocks.get_stock_historicals(q, interval='day', span='year')
 		for h in historicals:
 			temp_list.append({key: h[key] for key in h.keys() & {'begins_at', 'symbol', 'volume', 'session'}})
 	df = DataFrame.from_dict(temp_list)
 
 	# Calculate Mean, Median, Standard Dev, Min, Max
 	for t in tickers:
-		volume_history_5min_1week[t] = df[df["symbol"] == t].describe().to_dict()['volume']
+		volume_history[t] = df[df["symbol"] == t].describe().to_dict()['volume']
 
 	# Save Volume Mean TSV File
 	volume_history_filepath  = f'data/{timestamp}-5min-1week-volume-average.tsv'	
 	with open(volume_history_filepath, 'w+') as out_file:
 		tsv_writer = writer(out_file, delimiter='\t')
-		for k,v in volume_history_5min_1week.items():
+		for k,v in volume_history.items():
 			tsv_writer.writerow((k, int(v['mean'])))	
 
 	# Init RVOL TSV File	
@@ -159,12 +159,9 @@ if args['rvol_scanner']:
 
 		# Display Results
 		if len(rvol) > 1:
-			# for x in ticker_rvol_pairs:
-			# 	print(f'{x[0]:<6}{round(x[1],3)}')
-			# stdout.write('\n')
-		# else:
-			df = DataFrame.from_dict(rvol)
-			print(df)
+			for x in ticker_rvol_pairs:
+				print(f'{x[0]:<6}{round(x[1],3)}')
+			stdout.write('\n')
 
 		# Debug 
 		# print(f'ʕಠಿᴥಠʔ Tickers are {data["ticker"]} {type(data["ticker"])}\n')
@@ -190,4 +187,3 @@ if args['rvol_scanner']:
 			stdout.flush()
 			sleep(1)
 		print('\n\nWorking...\n')
-
