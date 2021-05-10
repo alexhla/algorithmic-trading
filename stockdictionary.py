@@ -1,10 +1,12 @@
 tickers = {}
 
-tickers['blacklist'] = [
+tickers['ten_random_tickers_for_test'] = [
+'EVFM', 'AUVI', 'QUIK', 'WISA', 'LEDS', 'RHE', 'PXS', 'JOB', 'AEI', 'MDLY',
+]
 
+tickers['blacklist'] = [
 # Incorrect Average Volume from Robin Hood API
 'NVOS', 'LIXT', 'RZLT', 'ELTK'
-
 ]
 
 tickers['microcap_float10M_price10USD'] = [

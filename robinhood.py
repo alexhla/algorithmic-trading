@@ -1,9 +1,9 @@
 from argparse import ArgumentParser
-from sys import stdout
 from datetime import datetime
-import time
-import csv
-import pandas as pd
+from pandas import DataFrame
+from time import sleep
+from sys import stdout
+from csv import writer
 
 #import robin_stocks as r  # package name differs with version
 import robin_stocks.robinhood as r
@@ -22,6 +22,9 @@ ap = ArgumentParser()
 ap.add_argument('-i', '--info', nargs='+', metavar=['TICKERS'],
 	help='')
 
+ap.add_argument('-hec', '--history_endpoint_checker', action='store_true',
+	help='')
+
 ap.add_argument('-rvol', '--rvol_scanner', nargs=1, metavar=['INTERVAL'],
 	help='')
 
@@ -30,6 +33,12 @@ args = vars(ap.parse_args())
 print(f'args --- {args}\n')
 
 
+
+'''
+
+Info
+
+'''
 
 if args['info']:
 
@@ -50,7 +59,7 @@ if args['info']:
 		d['latest_price'] = latest_price[i]
 
 	# Compute RVOL
-	df = pd.DataFrame.from_dict(data)
+	df = DataFrame.from_dict(data)
 	df['RVOL'] = df['volume'].astype(float) / df['average_volume'].astype(float)
 
 	# Display Results
@@ -59,56 +68,103 @@ if args['info']:
 
 
 
+'''
+
+History Endpoint Checker
+
+'''
+if args['history_endpoint_checker']:
+
+	selection = 'ten_random_tickers_for_test'
+	tickers = stockdictionary.tickers[selection]
+
+	for t in tickers:
+		print(f'{t}')
+		historicals = r.stocks.get_stock_historicals(t, interval='5minute', span='week')
+		print(historicals)
+
+
+
+'''
+
+RVOL Scanner
+
+'''
+
 if args['rvol_scanner']:
 
-	interval = int(args['rvol_scanner'][0])
-	selection = 'microcap_float10M_price10USD'
+	selection = 'ten_random_tickers_for_test'
+	timestamp = f'{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}-{selection.replace("_", "-")}'
 	tickers = stockdictionary.tickers[selection]
-	query_size = 100
+	interval = int(args['rvol_scanner'][0])	
+	volume_history_5min_1week = {}
+	volume = []
+	rvol = []
+	query_size = 75
 	query_list = []
-
-	# Build Query List
 	for i in range(0, len(tickers), query_size):
 		query_list.append(tickers[i:i+query_size])
 
-	# Init TSV File
-	tsv_filepath  = f'data/{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}-{selection.replace("_", "-")}-interval{interval}.tsv'	
-	with open(tsv_filepath, 'w+') as out_file:
-		tsv_writer = csv.writer(out_file, delimiter='\t')
+	# Get Volume History
+	temp_list = []
+	for i, q in enumerate(query_list):
+		print(f'Requesting Query List {i+1} of {len(query_list)}')
+		historicals = r.stocks.get_stock_historicals(q, interval='5minute', span='week')
+		for h in historicals:
+			temp_list.append({key: h[key] for key in h.keys() & {'begins_at', 'symbol', 'volume', 'session'}})
+	df = DataFrame.from_dict(temp_list)
+
+	# Calculate Mean, Median, Standard Dev, Min, Max
+	for t in tickers:
+		volume_history_5min_1week[t] = df[df["symbol"] == t].describe().to_dict()['volume']
+
+	# Save Volume Mean TSV File
+	volume_history_filepath  = f'data/{timestamp}-5min-1week-volume-average.tsv'	
+	with open(volume_history_filepath, 'w+') as out_file:
+		tsv_writer = writer(out_file, delimiter='\t')
+		for k,v in volume_history_5min_1week.items():
+			tsv_writer.writerow((k, int(v['mean'])))	
+
+	# Init RVOL TSV File	
+	rvol_filepath  = f'data/{timestamp}-interval{interval}s-rvol.tsv'	
+	with open(rvol_filepath, 'w+') as out_file:
+		tsv_writer = writer(out_file, delimiter='\t')
 		tsv_writer.writerow(tickers)
 
 	# Main Loop
 	while True:
-		volume = []
-		rvol = []
-		data= []
+		ticker_rvol_pairs = []
 
-		# Get Volume
+		# Get Current Volume
 		for q in query_list:
 			fundementals = r.stocks.get_fundamentals(q)
 			for f in fundementals:
 				volume.append({key: f[key] for key in f.keys() & {'volume', 'average_volume'}})
 
 		# Compute RVOL
-		df = pd.DataFrame.from_dict(volume)
+		df = DataFrame.from_dict(volume)
 		df['RVOL'] = df['volume'].astype(float) / df['average_volume'].astype(float)
-		rvol = df['RVOL'].tolist()
+		rvol.append(df['RVOL'].tolist())
 
 		# Update TSV File
-		with open(tsv_filepath, 'a') as out_file:
-			tsv_writer = csv.writer(out_file, delimiter='\t')
-			tsv_writer.writerow(rvol)
+		with open(rvol_filepath, 'a') as out_file:
+			tsv_writer = writer(out_file, delimiter='\t')
+			tsv_writer.writerow(rvol[-1])
 
 		# Generate List of (Ticker, RVOL) Tuple Pairs for Sorting
 		for i in range(len(tickers)):
 			if tickers[i] not in stockdictionary.tickers['blacklist']:
-				data.append((tickers[i], rvol[i]))
-		data.sort(key=lambda x:x[1])
+				ticker_rvol_pairs.append((tickers[i], rvol[-1][i]))
+		ticker_rvol_pairs.sort(key=lambda x:x[1])
 
 		# Display Results
-		for x in data:
-			print(f'{x[0]:<6}{round(x[1],3)}')
-		stdout.write('\n')
+		if len(rvol) > 1:
+			# for x in ticker_rvol_pairs:
+			# 	print(f'{x[0]:<6}{round(x[1],3)}')
+			# stdout.write('\n')
+		# else:
+			df = DataFrame.from_dict(rvol)
+			print(df)
 
 		# Debug 
 		# print(f'ʕಠಿᴥಠʔ Tickers are {data["ticker"]} {type(data["ticker"])}\n')
@@ -132,5 +188,6 @@ if args['rvol_scanner']:
 			stdout.write('\r')
 			stdout.write(f'Updating in {interval-i} Seconds...')
 			stdout.flush()
-			time.sleep(1)
+			sleep(1)
 		print('\n\nWorking...\n')
+
