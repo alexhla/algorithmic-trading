@@ -5,12 +5,12 @@ from time import sleep
 from sys import stdout
 from csv import writer
 
-#import robin_stocks as r  # package name differs with version
-import robin_stocks.robinhood as r
+import robin_stocks as r  # package name differs with version
+#import robin_stocks.robinhood as r
 
 # local imports
 import config
-import stockdictionary
+import watchlists
 
 # Login to Robinhood
 r.login(config.ROBINHOOD_EMAIL, config.ROBINHOOD_PASSWORD)
@@ -76,7 +76,7 @@ History Endpoint Checker
 if args['history_endpoint_checker']:
 
 	selection = 'ten_random_tickers_for_test'
-	tickers = stockdictionary.tickers[selection]
+	tickers = watchlists.tickers[selection]
 
 	for t in tickers:
 		print(f'{t}')
@@ -93,9 +93,9 @@ RVOL Scanner
 
 if args['rvol_scanner']:
 
-	selection = 'ten_random_tickers_for_test'
+	selection = 'microcap_float10M_price10USD'
 	timestamp = f'{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}-{selection.replace("_", "-")}'
-	tickers = stockdictionary.tickers[selection]
+	tickers = watchlists.tickers[selection]
 	interval = int(args['rvol_scanner'][0])	
 	rvol = []
 	volume = []
@@ -153,7 +153,7 @@ if args['rvol_scanner']:
 
 		# Generate List of (Ticker, RVOL) Tuple Pairs for Sorting
 		for i in range(len(tickers)):
-			if tickers[i] not in stockdictionary.tickers['blacklist']:
+			if tickers[i] not in watchlists.tickers['blacklist']:
 				ticker_rvol_pairs.append((tickers[i], rvol[-1][i]))
 		ticker_rvol_pairs.sort(key=lambda x:x[1])
 
