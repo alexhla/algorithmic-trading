@@ -1,35 +1,31 @@
 tickers = {}
 
-tickers['ten_random_tickers_for_test'] = [
-'EVFM', 'AUVI', 'QUIK', 'WISA', 'LEDS', 'RHE', 'PXS', 'JOB', 'AEI', 'MDLY',
-]
-
-tickers['blacklist'] = [
-# Incorrect Average Volume from Robin Hood API
-'NVOS', 'LIXT', 'RZLT', 'ELTK'
+tickers['foobar'] = [
+'EVFM', 'AUVI', 'QUIK', 'WISA', 'LEDS', 'PXS', 'SPY', 'MSFT', 'AAPL', 'TSLA',
 ]
 
 tickers['microcap_float10M_price10USD'] = [
 
-'AAME', 'ABIO', 'ACOR', 'ACY', 'ADXN', 'AEHL', 'AEI', 'AEY',
-'AGFY', 'AHPI', 'AIH', 'AINC', 'AMBO', 'AMPG', 'AMS', 'AMST',
-'ANPC', 'ANY', 'APDN', 'APM', 'APOP', 'APWC', 'ARDS', 'ARTW',
-'ASPS', 'ATXI', 'AUTO', 'AUUD', 'AUVI', 'AVCT', 'AWX', 'AXAS',
+'AAME', 'ABIO', 'ACOR', 'ACY', 'AEHL', 'AEI', 'AEY',
+'AGFY', 'AHPI', 'AIH', 'AMBO', 'AMPG', 'AMS', 'AMST',
+'ANPC', 'ANY', 'APDN', 'APM', 'APOP', 'APWC',
+'ASPS', 'ATXI', 'AUTO', 'AUVI', 'AWX', 'AXAS',
 'AZYO',
 
-'BBGI', 'BBIG', 'BCAC', 'BCDA', 'BCTX', 'BDR', 'BGI', 'BIMI',
-'BITE', 'BKYI', 'BLCM', 'BLIN', 'BLPH', 'BMRA', 'BMTX', 'BNSO',
-'BNTC', 'BOSC', 'BPTH', 'BRN', 'BSBK', 'BYFC',
+'BBGI', 'BBIG', 'BCDA', 'BCTX', 'BDR', 'BGI', 'BIMI',
+'BKYI', 'BLCM', 'BLIN', 'BMRA', 'BMTX', 'BNSO',
+'BNTC', 'BPTH', 'BRN', 'BYFC', 'BRN',
 
-'CAHC', 'CARV', 'CBLI', 'CDOR', 'CELP', 'CHCI', 'CHFW', 'CHNR',
-'CLEU', 'CLPS', 'CLWT', 'CNEY', 'CNFR', 'CNTG', 'CODA', 'CPIX',
-'CPSH', 'CREG', 'CREX', 'CRKN', 'CRTD', 'CRWS', 'CSPI', 'CTEK',
-'CTIB', 'CUEN', 'CVV', 'CXDO', 'CYAN', 'CYCC', 'CYTH',
 
-'DAIO', 'DLCA', 'DLPN', 'DSWL', 'DTSS', 'DUOT', 'DXF', 'DXR',
+'CAHC', 'CARV', 'CBLI', 'CDOR', 'CELP', 'CHCI', 'CHNR',
+'CLEU', 'CLPS', 'CLWT',
+'CPSH', 'CREG', 'CREX', 'CRKN', 'CRTD', 'CTEK',
+'CTIB', 'CYAN', 'CYCC', 'CYTH',
 
-'EAST', 'EDSA', 'EDTK', 'EFOI', 'ELA', 'ELMD', 'ELSE', 'ELTK',
-'ELYS', 'ENSV', 'EQS', 'EVAX', 'EVK', 'EVOL', 'EYEG', 'EZGO',
+'DAIO', 'DLPN', 'DTSS', 'DXF',
+
+'EAST', 'EDSA', 'EDTK', 'EFOI', 'ELA', 'ELSE',
+'ELYS', 'ENSV', 'EVK', 'EVOL', 'EYES', 'EZGO',
 
 'FAMI', 'FFHL', 'FGF', 'FNHC', 'FORD', 'FSI', 'FSSI', 'FSTX',
 'FWP',
@@ -48,7 +44,7 @@ tickers['microcap_float10M_price10USD'] = [
 
 'KBNT', 'KBSF', 'KFFB', 'KINS',
 
-'LEDS', 'LEGO', 'LEXX', 'LGVN', 'LIXT', 'LMNL', 'LNSR', 'LOAN',
+'LEDS', 'LEGO', 'LEXX', 'LGVN', 'LMNL', 'LNSR', 'LOAN',
 'LTBR', 'LWAY', 'LXEH', 'LYL', 'LYRA',
 
 'MARPS', 'MBOT', 'MDIA', 'MDJH', 'MDLY', 'MDRR', 'MEDS', 'MFH',
@@ -58,7 +54,7 @@ tickers['microcap_float10M_price10USD'] = [
 
 'NEON', 'NEPH', 'NES', 'NETE', 'NEWA', 'NHIC', 'NHTC', 'NNVC',
 'NRT', 'NSPR', 'NSYS', 'NTEC', 'NTWK', 'NURO', 'NUWE', 'NUZE',
-'NVFY', 'NVOS',
+'NVFY',
 
 'OBLN', 'OCC', 'OCUP', 'OLB', 'OMEX', 'ONVO', 'OPHC', 'OSN',
 'OXBR', 
@@ -67,10 +63,9 @@ tickers['microcap_float10M_price10USD'] = [
 'PMD', 'PNBK', 'PPIH', 'PPSI', 'PRT', 'PSHG', 'PSTV', 'PTPI',
 'PXS',
 
-'QH', 'QLI', 
+'QH', 'QLI', 'QUIK',
 
 'RCMT', 'RCON', 'RELI', 'RFIL', 'RMCF', 'RMED', 'RNGR', 'RVPH',
-'RZLT',
 
 'SCKT', 'SCPS', 'SCX', 'SELF', 'SGBX', 'SGLB', 'SGMA', 'SGRP',
 'SIEB', 'SJ', 'SLGL', 'SMIT', 'SNES', 'SNFCA', 'SNOA', 'SQFT',

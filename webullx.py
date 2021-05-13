@@ -11,7 +11,8 @@ ap.add_argument('-gsq', '--get_security_question', action='store_true')
 ap.add_argument('-gat', '--get_access_token', action='store_true')
 ap.add_argument('-rat', '--refresh_access_token', action='store_true')
 ap.add_argument('-gco', '--get_current_orders', action='store_true')
-ap.add_argument('-por', '--place_order', nargs=1, metavar=['TICKER'])
+ap.add_argument('-gba', '--get_bid_ask', nargs=1, metavar=['TICKER'])
+ap.add_argument('-place_order', '--place_order', nargs=1, metavar=['TICKER'])
 
 args = vars(ap.parse_args())
 print(f'args --- {args}\n')
@@ -79,6 +80,28 @@ if args['get_current_orders']:
 		lmtPrice = order['lmtPrice']
 		print(f'{orderType} {action} {symbol}\t{lmtPrice}')
 		
+
+
+
+'''
+
+Get Bid Ask
+
+'''
+
+if args['get_bid_ask']:
+	ticker = args['place_order'][0]
+	quote = wb.get_quote(stock=ticker)
+	print(f'ᶘಠᴥಠᶅ Quote is {quote}')
+
+	ask_price = float(quote['depth']['ntvAggAskList'][0]['price'])
+	bid_price = float(quote['depth']['ntvAggBidList'][0]['price'])
+	order_price = round((bid_price + ask_price) / 2, 2)
+	print(f'ᶘಠᴥಠᶅ {ticker} Ask Price: {ask_price}')
+	print(f'ᶘಠᴥಠᶅ {ticker} Mid Price: {order_price}')
+	print(f'ᶘಠᴥಠᶅ {ticker} Bid Price: {bid_price}')
+
+
 '''
 
 Place Order
@@ -92,7 +115,7 @@ if args['place_order']:
 
 	ask_price = float(quote['depth']['ntvAggAskList'][0]['price'])
 	bid_price = float(quote['depth']['ntvAggBidList'][0]['price'])
-	order_price = round(bid_price - (bid_price*0.01), 2)
+	order_price = round((bid_price + ask_price) / 2, 2)
 	print(f'ᶘಠᴥಠᶅ {ticker} Ask Price: {ask_price}')
 	print(f'ᶘಠᴥಠᶅ {ticker} Bid Price: {bid_price}')
 	print(f'ᶘಠᴥಠᶅ Order Price: {order_price}')
@@ -102,7 +125,8 @@ if args['place_order']:
 	# print(f'ᶘಠᴥಠᶅ ID Response is {id_response}')
 	# print(f'ᶘಠᴥಠᶅ Token Response is {token_response}')
 
-	qty = int(6300/order_price)
+	qty = int(6200/order_price)
 	print(f'Buying {qty} Shares of {ticker} at {order_price}')
+
 	response = wb.place_order(stock=ticker, price=order_price, action='BUY', orderType='LMT', enforce='GTC', quant=qty)
-	print(response)
+	print(f'Broker Response {response}')
