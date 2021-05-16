@@ -71,7 +71,7 @@ Volume Checker
 
 if args['volume_checker']:
 
-	selection = 'microcap_float10M_price10USD'
+	selection = 'schwab_05_2020'
 	tickers = watchlists.tickers[selection]
 	query_size = 100
 	query_list = []
@@ -141,82 +141,99 @@ Scanner
 
 if args['volume_scanner']:
 
-	selection = 'foobar'
-	tickers = watchlists.tickers[selection]
-	volume_history = get_volume_history_maximums(selection)	
-	volume = []
-	rvol = []
-	query_size = 75
+	tickers = watchlists.tickers['foobar']
+	rvol = {}
+	rvol['history'] = []
+	query_size = 100  # 100 max per API Request
 	query_list = []
 	for i in range(0, len(tickers), query_size):
 		query_list.append(tickers[i:i+query_size])
 
-
 	while True:
-		ranked_rvol = []
-		ranked_5min_week = []
-		ranked_hour_month = []
+		rvol['current'] = []
+		rvol['30s'] = []
+		rvol['60s'] = []
+		rvol['90s'] = []
+		rvol['2m'] = []
+		rvol['3m'] = []
+		rvol['4m'] = []
+		rvol['5m'] = []
+		rvol['10m'] = []
+		rvol['15m'] = []
 
 		# Get Current Volume
-		temp = []
+		temp_volume = []
 		for q in query_list:
 			fundementals = r.stocks.get_fundamentals(q)
 			for f in fundementals:
-				temp.append({key: f[key] for key in f.keys() & {'volume', 'average_volume'}})
+				temp_volume.append({key: f[key] for key in f.keys() & {'volume', 'average_volume'}})
 
-		# Convert to Data Frame and Compute RVOL 
-		df = DataFrame.from_dict(temp)
-		df['RVOL'] = df['volume'].astype(float) / df['average_volume'].astype(float)
+		# Convert to Data Frame and Compute RVOL
+		df = DataFrame.from_dict(temp_volume)
+		df['RVOL'] = (df['volume'].astype(float) / df['average_volume'].astype(float)).round(3)
+		rvol['history'].append(df['RVOL'].tolist())
 
-		# Log Volume and RVOL
-		volume.append(df['volume'].astype(float).tolist())
-		rvol.append(df['RVOL'].tolist())
+		# Create (Ticker, RVOL) Pairs for Sorting Current RVOL
+		for i in range(len(tickers)):
+			rvol['current'].append((tickers[i], rvol['history'][-1][i]))
 
-		if len(volume) > 1 :
+		# Calculate RVOL Delta for Each Timeframe
+		for i in range(len(tickers)):
+			if len(rvol['history']) >= 2:
+				rvol['30s'].append((tickers[i], rvol['history'][-1][i] - rvol['history'][-2][i]))
+			if len(rvol['history']) >= 3:
+				rvol['60s'].append((tickers[i], rvol['history'][-1][i] - rvol['history'][-3][i]))
+			if len(rvol['history']) >= 4:
+				rvol['90s'].append((tickers[i], rvol['history'][-1][i] - rvol['history'][-4][i]))
+			if len(rvol['history']) >= 5:
+				rvol['2m'].append((tickers[i], rvol['history'][-1][i] - rvol['history'][-5][i]))
+			if len(rvol['history']) >= 7:
+				rvol['3m'].append((tickers[i], rvol['history'][-1][i] - rvol['history'][-7][i]))
+			if len(rvol['history']) >= 9:
+				rvol['4m'].append((tickers[i], rvol['history'][-1][i] - rvol['history'][-9][i]))
+			if len(rvol['history']) >= 11:
+				rvol['5m'].append((tickers[i], rvol['history'][-1][i] - rvol['history'][-11][i]))
+			if len(rvol['history']) >= 21:
+				rvol['10m'].append((tickers[i], rvol['history'][-1][i] - rvol['history'][-21][i]))
+			if len(rvol['history']) >= 31:
+				rvol['15m'].append((tickers[i], rvol['history'][-1][i] - rvol['history'][-31][i]))
+
+		# Sort
+		rvol['current'].sort(key=lambda x:x[1])
+		rvol['30s'].sort(key=lambda x:x[1])
+		rvol['60s'].sort(key=lambda x:x[1])
+		rvol['90s'].sort(key=lambda x:x[1])
+		rvol['2m'].sort(key=lambda x:x[1])
+		rvol['4m'].sort(key=lambda x:x[1])
+		rvol['3m'].sort(key=lambda x:x[1])
+		rvol['5m'].sort(key=lambda x:x[1])
+		rvol['10m'].sort(key=lambda x:x[1])
+		rvol['15m'].sort(key=lambda x:x[1])
+
+		if len(rvol['history']) == 2:
 			for i in range(len(tickers)):
+				print(f'{rvol["current"][i][0]:<6}{rvol["current"][i][1]:<10}{rvol["30s"][i][0]:<6}{rvol["30s"][i][1]:<10}')
+			print('RVOL{:<12}30s Δ'.format(' '))
+		# elif len(rvol) == 3:
+		# 	for i in range(0, len(tickers)):
+		# 		print(f'{rvol_total[i][0]:<6}{rvol_total[i][1]:<10}{rvol_30s[i][0]:<6}{rvol_30s[i][1]:<10}{rvol_60s[i][0]:<6}{rvol_60s[i][1]:<10}')
+		# 	print('RVOL{:<12}30s{:<6}60s'.format(' ', ' '))
 
-				vdelta = round(volume[-1][i] - volume[-2][i], 3)
-				v_5min_week = round(volume_history[tickers[i]][0] / 10, 3)
-				v_hour_month = round(volume_history[tickers[i]][1] / 120, 3)
-
-				ranked_5min_week.append((tickers[i], vdelta / v_5min_week))
-				ranked_hour_month.append((tickers[i], vdelta / v_hour_month))
-				ranked_rvol.append((tickers[i], round(rvol[-1][i], 3)))
-
-			# Sort
-			ranked_rvol.sort(key=lambda x:x[1])
-			ranked_5min_week.sort(key=lambda x:x[1])
-			ranked_hour_month.sort(key=lambda x:x[1])
-
-			# Display Results
-			print('RVOL{:<14}5min/Week{:<9}hour/month'.format(' ', ' '))
-			for i in range(0, len(tickers)):
-				print(f'{ranked_rvol[i][0]:<6}{ranked_rvol[i][1]:<12}{ranked_5min_week[i][0]:<6}{ranked_5min_week[i][1]:<12}{ranked_hour_month[i][0]:<6}{ranked_hour_month[i][1]:<12}')
+			# for i in range(0, len(tickers)):
+			# 	print(f'{rvol_total[i][0]:<6}{rvol_total[i][1]:<10}{rvol_30s[i][0]:<6}{rvol_30s[i][1]:<10}{rvol_60s[i][0]:<6}{rvol_60s[i][1]:<10}{rvol_90s[i][0]:<6}{rvol_90s[i][1]:<12}')
+			# print('RVOL{:<12}30s{:<6}60s{:<8}90s'.format(' ', ' ', ' '))
 
 		# Debug 
-		# print(f'ʕಠಿᴥಠʔ Tickers are {data["ticker"]} {type(data["ticker"])}\n')
-		# print(f'ʕಠಿᴥಠʔ Ticker Count is {len(data["ticker"])}\n')
-		# print(f'ʕಠಿᴥಠʔ Request is {request} {type(request)}\n')
-		# print(f'ʕಠಿᴥಠʔ df is {df} {type(df)}\n')
-		# print(f'ʕಠಿᴥಠʔ Fundementals are {fundementals} {type(fundementals)}\n')
-		# print(f'ʕಠಿᴥಠʔ Data is {data} {type(data)}\n')
-		# print(f'ʕಠಿᴥಠʔ Volume is {data["volume"]} {type(data["volume"])}\n')
-		# print(f'ʕಠಿᴥಠʔ Volume is {volume} {type(volume)}\n')
-		# print(f'ʕಠಿᴥಠʔ Volume is {temp} {type(temp)}\n')	
-		# print(f'ʕಠಿᴥಠʔ Volume Count is {len(data["volume"])}\n')
-		# print(f'ʕಠಿᴥಠʔ Volume History\n{volume_history}\n')
-		# print(f'ʕಠಿᴥಠʔ Average Volume is {data["average_volume"]} {type(data["average_volume"])}\n')
-		# print(f'ʕಠಿᴥಠʔ Average Volume Count is {len(data["average_volume"])}\n')
-		# print(f'ʕಠಿᴥಠʔ RVOL is {data["RVOL"]} {type(data["RVOL"])}\n')
-		# print(f'ʕಠಿᴥಠʔ rvol is {rvol} {type(rvol)}\n')
-		# print(f'ʕಠಿᴥಠʔ Volume Increase Rank is {volume_increase_rank} {type(volume_increase_rank)}\n')
-		# print(f'ʕಠಿᴥಠʔ Volume vs 5min/Week Rank is {volume_vs_5min_week_max} {type(volume_vs_5min_week_max)}\n')
-		# print(f'ʕಠಿᴥಠʔ Volume vs hour/month Rank is {volume_vs_hour_month_max} {type(volume_vs_hour_month_max)}\n')		
-		# for key in data:
-		# 	print(f'ʕಠಿᴥಠʔ {key} {len(data[key])}')
+		# print(f'ʕಠಿᴥಠʔ Tickers are {tickers} --- Type: {type(tickers)} --- Length: {len(tickers)}\n')
+		# print(f'ʕಠಿᴥಠʔ Volume is {volume} --- Type: {type(volume)} --- Length: {len(volume)}\n')
+		# print(f'ʕಠಿᴥಠʔ RVOL is {rvol} --- Type: {type(rvol)} --- Length: {len(rvol)}\n')
+		# print(f'ʕಠಿᴥಠʔ RVOL Current is {rvol_total} --- Type: {type(rvol_total)} --- Length: {len(rvol_total)}\n')
+		# print(f'ʕಠಿᴥಠʔ RVOL 30s is {rvol_30s} --- Type: {type(rvol_30s)} --- Length: {len(rvol_30s)}\n')
+		# print(f'ʕಠಿᴥಠʔ RVOL 60s is {rvol_60s} --- Type: {type(rvol_60s)} --- Length: {len(rvol_60s)}\n')
+		# print(f'ʕಠಿᴥಠʔ RVOL 90s is {rvol_90s} --- Type: {type(rvol_90s)} --- Length: {len(rvol_90s)}\n')
 
 		# Wait
-		wait_seconds = 30
+		wait_seconds = 5
 		for i in range(0, wait_seconds+1):
 			stdout.write('\r')
 			stdout.write(f'Updating in {wait_seconds-i} Seconds...')
