@@ -3,8 +3,8 @@ from pandas import DataFrame
 from time import sleep
 from sys import stdout
 
-#import robin_stocks as r  # package name differs with version
-import robin_stocks.robinhood as r
+import robin_stocks as r  # package name differs with version
+#import robin_stocks.robinhood as r
 
 # local imports
 import config
@@ -112,31 +112,34 @@ if args['sizzle_scanner']:
 
 		volume = []
 		rvol['current'] = []
+		rvol['15s'] = []
 		rvol['30s'] = []
+		rvol['45s'] = []
 		rvol['60s'] = []
+		rvol['75s'] = []
 		rvol['90s'] = []
-		rvol['2m'] = []
-		rvol['3m'] = []
-		rvol['4m'] = []
-		rvol['5m'] = []
-		rvol['7m'] = []
-		rvol['9m'] = []
-		rvol['11m'] = []
-		rvol['13m'] = []
+		rvol['105s'] = []
+		rvol['120s'] = []
+		rvol['135s'] = []
+		rvol['150s'] = []
+		rvol['165s'] = []
+		rvol['180s'] = []
+
 
 		latest_price = []
 		price['current'] = []
+		price['15s'] = []
 		price['30s'] = []
+		price['45s'] = []
 		price['60s'] = []
+		price['75s'] = []
 		price['90s'] = []
-		price['2m'] = []
-		price['3m'] = []
-		price['4m'] = []
-		price['5m'] = []
-		price['7m'] = []
-		price['9m'] = []
-		price['11m'] = []
-		price['13m'] = []
+		price['105s'] = []
+		price['120s'] = []
+		price['135s'] = []
+		price['150s'] = []
+		price['165s'] = []
+		price['180s'] = []
 
 		# Get Current Volume and Price
 		for i, q in enumerate(query_list):
@@ -162,91 +165,103 @@ if args['sizzle_scanner']:
 		for i in range(len(tickers)):
 			if len(rvol['history']) >= 2:
 				trend = '+' if price['history'][-1][i] > price['history'][-2][i] else '-'
-				rvol['30s'].append((tickers[i], trend, rvol['history'][-1][i] - rvol['history'][-2][i]))
+				rvol['15s'].append((tickers[i], trend, round(rvol['history'][-1][i] - rvol['history'][-2][i], 2)))
 			if len(rvol['history']) >= 3:
 				trend = '+' if price['history'][-1][i] > price['history'][-3][i] else '-'
-				rvol['60s'].append((tickers[i], trend, rvol['history'][-1][i] - rvol['history'][-3][i]))
+				rvol['30s'].append((tickers[i], trend, round(rvol['history'][-1][i] - rvol['history'][-3][i], 2)))
 			if len(rvol['history']) >= 4:
 				trend = '+' if price['history'][-1][i] > price['history'][-4][i] else '-'
-				rvol['90s'].append((tickers[i], trend, rvol['history'][-1][i] - rvol['history'][-4][i]))
+				rvol['45s'].append((tickers[i], trend, round(rvol['history'][-1][i] - rvol['history'][-4][i], 2)))
 			if len(rvol['history']) >= 5:
 				trend = '+' if price['history'][-1][i] > price['history'][-5][i] else '-'
-				rvol['2m'].append((tickers[i], trend, rvol['history'][-1][i] - rvol['history'][-5][i]))
+				rvol['60s'].append((tickers[i], trend, round(rvol['history'][-1][i] - rvol['history'][-5][i], 2)))
+			if len(rvol['history']) >= 6:
+				trend = '+' if price['history'][-1][i] > price['history'][-6][i] else '-'
+				rvol['75s'].append((tickers[i], trend, round(rvol['history'][-1][i] - rvol['history'][-6][i], 2)))
 			if len(rvol['history']) >= 7:
 				trend = '+' if price['history'][-1][i] > price['history'][-7][i] else '-'
-				rvol['3m'].append((tickers[i], trend, rvol['history'][-1][i] - rvol['history'][-7][i]))
+				rvol['90s'].append((tickers[i], trend, round(rvol['history'][-1][i] - rvol['history'][-7][i], 2)))
+			if len(rvol['history']) >= 8:
+				trend = '+' if price['history'][-1][i] > price['history'][-8][i] else '-'
+				rvol['105s'].append((tickers[i], trend, round(rvol['history'][-1][i] - rvol['history'][-8][i], 2)))
 			if len(rvol['history']) >= 9:
 				trend = '+' if price['history'][-1][i] > price['history'][-9][i] else '-'
-				rvol['4m'].append((tickers[i], trend, rvol['history'][-1][i] - rvol['history'][-9][i]))
+				rvol['120s'].append((tickers[i], trend, round(rvol['history'][-1][i] - rvol['history'][-9][i], 2)))
+			if len(rvol['history']) >= 10:
+				trend = '+' if price['history'][-1][i] > price['history'][-10][i] else '-'
+				rvol['135s'].append((tickers[i], trend, round(rvol['history'][-1][i] - rvol['history'][-10][i], 2)))
 			if len(rvol['history']) >= 11:
 				trend = '+' if price['history'][-1][i] > price['history'][-11][i] else '-'
-				rvol['5m'].append((tickers[i], trend, rvol['history'][-1][i] - rvol['history'][-11][i]))
-			if len(rvol['history']) >= 15:
-				trend = '+' if price['history'][-1][i] > price['history'][-15][i] else '-'
-				rvol['7m'].append((tickers[i], trend, rvol['history'][-1][i] - rvol['history'][-15][i]))
-			if len(rvol['history']) >= 19:
-				trend = '+' if price['history'][-1][i] > price['history'][-19][i] else '-'
-				rvol['9m'].append((tickers[i], trend, rvol['history'][-1][i] - rvol['history'][-19][i]))
-			if len(rvol['history']) >= 23:
-				trend = '+' if price['history'][-1][i] > price['history'][-23][i] else '-'
-				rvol['11m'].append((tickers[i], trend, rvol['history'][-1][i] - rvol['history'][-23][i]))
-			if len(rvol['history']) >= 27:
-				trend = '+' if price['history'][-1][i] > price['history'][-27][i] else '-'
-				rvol['13m'].append((tickers[i], trend, rvol['history'][-1][i] - rvol['history'][-27][i]))
+				rvol['150s'].append((tickers[i], trend, round(rvol['history'][-1][i] - rvol['history'][-11][i], 2)))
+			if len(rvol['history']) >= 12:
+				trend = '+' if price['history'][-1][i] > price['history'][-12][i] else '-'
+				rvol['165s'].append((tickers[i], trend, round(rvol['history'][-1][i] - rvol['history'][-12][i], 2)))
+			if len(rvol['history']) >= 13:
+				trend = '+' if price['history'][-1][i] > price['history'][-13][i] else '-'
+				rvol['180s'].append((tickers[i], trend, round(rvol['history'][-1][i] - rvol['history'][-13][i], 2)))
 
 		# Sort
 		rvol['current'].sort(key=lambda x:x[1])
-		rvol['30s'].sort(key=lambda x:x[1])
-		rvol['60s'].sort(key=lambda x:x[1])
-		rvol['90s'].sort(key=lambda x:x[1])
-		rvol['2m'].sort(key=lambda x:x[1])
-		rvol['3m'].sort(key=lambda x:x[1])
-		rvol['4m'].sort(key=lambda x:x[1])
-		rvol['5m'].sort(key=lambda x:x[1])
-		rvol['7m'].sort(key=lambda x:x[1])
-		rvol['9m'].sort(key=lambda x:x[1])
-		rvol['11m'].sort(key=lambda x:x[1])
-		rvol['13m'].sort(key=lambda x:x[1])
+		rvol['15s'].sort(key=lambda x:x[2])
+		rvol['30s'].sort(key=lambda x:x[2])
+		rvol['45s'].sort(key=lambda x:x[2])
+		rvol['60s'].sort(key=lambda x:x[2])
+		rvol['75s'].sort(key=lambda x:x[2])
+		rvol['90s'].sort(key=lambda x:x[2])
+		rvol['105s'].sort(key=lambda x:x[2])
+		rvol['120s'].sort(key=lambda x:x[2])
+		rvol['135s'].sort(key=lambda x:x[2])
+		rvol['150s'].sort(key=lambda x:x[2])
+		rvol['165s'].sort(key=lambda x:x[2])
+		rvol['180s'].sort(key=lambda x:x[2])
 
 		# Display Results
-		if len(rvol['history']) >= 27:  # 13m
+		if len(rvol['history']) >= 13:  # 180s
 			for i in range(len(tickers)):
-				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["90s"][i][0]:<4}{rvol["90s"][i][1]}{rvol["90s"][i][2]:<7}{rvol["2m"][i][0]:<4}{rvol["2m"][i][1]}{rvol["2m"][i][2]:<7}{rvol["3m"][i][0]:<4}{rvol["3m"][i][1]}{rvol["3m"][i][2]:<7}{rvol["4m"][i][0]:<4}{rvol["4m"][i][1]}{rvol["4m"][i][2]:<7}{rvol["5m"][i][0]:<4}{rvol["5m"][i][1]}{rvol["5m"][i][2]:<7}{rvol["7m"][i][0]:<4}{rvol["7m"][i][1]}{rvol["7m"][i][2]:<7}{rvol["9m"][i][0]:<4}{rvol["9m"][i][1]}{rvol["9m"][i][2]:<7}{rvol["11m"][i][0]:<4}{rvol["11m"][i][1]}{rvol["11m"][i][2]:<7}{rvol["13m"][i][0]:<4}{rvol["13m"][i][1]}{rvol["13m"][i][2]:<7}')
-		elif len(rvol['history']) >= 23 and len(rvol['history']) <= 26:  # 11m
+				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["15s"][i][0]:<4}{rvol["15s"][i][1]}{rvol["15s"][i][2]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["45s"][i][0]:<4}{rvol["45s"][i][1]}{rvol["45s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["75s"][i][0]:<4}{rvol["75s"][i][1]}{rvol["75s"][i][2]:<7}{rvol["90s"][i][0]:<4}{rvol["90s"][i][1]}{rvol["90s"][i][2]:<7}{rvol["105s"][i][0]:<4}{rvol["105s"][i][1]}{rvol["105s"][i][2]:<7}{rvol["120s"][i][0]:<4}{rvol["120s"][i][1]}{rvol["120s"][i][2]:<7}{rvol["135s"][i][0]:<4}{rvol["135s"][i][1]}{rvol["135s"][i][2]:<7}{rvol["150s"][i][0]:<4}{rvol["150s"][i][1]}{rvol["150s"][i][2]:<7}{rvol["165s"][i][0]:<4}{rvol["165s"][i][1]}{rvol["165s"][i][2]:<7}{rvol["180s"][i][0]:<4}{rvol["180s"][i][1]}{rvol["180s"][i][2]:<7}')
+		elif len(rvol['history']) == 12:  # 165s
 			for i in range(len(tickers)):
-				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["90s"][i][0]:<4}{rvol["90s"][i][1]}{rvol["90s"][i][2]:<7}{rvol["2m"][i][0]:<4}{rvol["2m"][i][1]}{rvol["2m"][i][2]:<7}{rvol["3m"][i][0]:<4}{rvol["3m"][i][1]}{rvol["3m"][i][2]:<7}{rvol["4m"][i][0]:<4}{rvol["4m"][i][1]}{rvol["4m"][i][2]:<7}{rvol["5m"][i][0]:<4}{rvol["5m"][i][1]}{rvol["5m"][i][2]:<7}{rvol["7m"][i][0]:<4}{rvol["7m"][i][1]}{rvol["7m"][i][2]:<7}{rvol["9m"][i][0]:<4}{rvol["9m"][i][1]}{rvol["9m"][i][2]:<7}{rvol["11m"][i][0]:<4}{rvol["11m"][i][1]}{rvol["11m"][i][2]:<7}')
-		elif len(rvol['history']) >= 19 and len(rvol['history']) <= 22:  # 9m
+				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["15s"][i][0]:<4}{rvol["15s"][i][1]}{rvol["15s"][i][2]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["45s"][i][0]:<4}{rvol["45s"][i][1]}{rvol["45s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["75s"][i][0]:<4}{rvol["75s"][i][1]}{rvol["75s"][i][2]:<7}{rvol["90s"][i][0]:<4}{rvol["90s"][i][1]}{rvol["90s"][i][2]:<7}{rvol["105s"][i][0]:<4}{rvol["105s"][i][1]}{rvol["105s"][i][2]:<7}{rvol["120s"][i][0]:<4}{rvol["120s"][i][1]}{rvol["120s"][i][2]:<7}{rvol["135s"][i][0]:<4}{rvol["135s"][i][1]}{rvol["135s"][i][2]:<7}{rvol["150s"][i][0]:<4}{rvol["150s"][i][1]}{rvol["150s"][i][2]:<7}{rvol["165s"][i][0]:<4}{rvol["165s"][i][1]}{rvol["165s"][i][2]:<7}')
+		elif len(rvol['history']) == 11:  # 150s
 			for i in range(len(tickers)):
-				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["90s"][i][0]:<4}{rvol["90s"][i][1]}{rvol["90s"][i][2]:<7}{rvol["2m"][i][0]:<4}{rvol["2m"][i][1]}{rvol["2m"][i][2]:<7}{rvol["3m"][i][0]:<4}{rvol["3m"][i][1]}{rvol["3m"][i][2]:<7}{rvol["4m"][i][0]:<4}{rvol["4m"][i][1]}{rvol["4m"][i][2]:<7}{rvol["5m"][i][0]:<4}{rvol["5m"][i][1]}{rvol["5m"][i][2]:<7}{rvol["7m"][i][0]:<4}{rvol["7m"][i][1]}{rvol["7m"][i][2]:<7}{rvol["9m"][i][0]:<4}{rvol["9m"][i][1]}{rvol["9m"][i][2]:<7}')
-		elif len(rvol['history']) >= 15 and len(rvol['history']) <= 18:  # 7m
+				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["15s"][i][0]:<4}{rvol["15s"][i][1]}{rvol["15s"][i][2]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["45s"][i][0]:<4}{rvol["45s"][i][1]}{rvol["45s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["75s"][i][0]:<4}{rvol["75s"][i][1]}{rvol["75s"][i][2]:<7}{rvol["90s"][i][0]:<4}{rvol["90s"][i][1]}{rvol["90s"][i][2]:<7}{rvol["105s"][i][0]:<4}{rvol["105s"][i][1]}{rvol["105s"][i][2]:<7}{rvol["120s"][i][0]:<4}{rvol["120s"][i][1]}{rvol["120s"][i][2]:<7}{rvol["135s"][i][0]:<4}{rvol["135s"][i][1]}{rvol["135s"][i][2]:<7}{rvol["150s"][i][0]:<4}{rvol["150s"][i][1]}{rvol["150s"][i][2]:<7}')
+		elif len(rvol['history']) == 10:  # 135s
 			for i in range(len(tickers)):
-				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["90s"][i][0]:<4}{rvol["90s"][i][1]}{rvol["90s"][i][2]:<7}{rvol["2m"][i][0]:<4}{rvol["2m"][i][1]}{rvol["2m"][i][2]:<7}{rvol["3m"][i][0]:<4}{rvol["3m"][i][1]}{rvol["3m"][i][2]:<7}{rvol["4m"][i][0]:<4}{rvol["4m"][i][1]}{rvol["4m"][i][2]:<7}{rvol["5m"][i][0]:<4}{rvol["5m"][i][1]}{rvol["5m"][i][2]:<7}{rvol["7m"][i][0]:<4}{rvol["7m"][i][1]}{rvol["7m"][i][2]:<7}')
-		elif len(rvol['history']) >= 11 and len(rvol['history']) <= 14:  # 5m
+				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["15s"][i][0]:<4}{rvol["15s"][i][1]}{rvol["15s"][i][2]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["45s"][i][0]:<4}{rvol["45s"][i][1]}{rvol["45s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["75s"][i][0]:<4}{rvol["75s"][i][1]}{rvol["75s"][i][2]:<7}{rvol["90s"][i][0]:<4}{rvol["90s"][i][1]}{rvol["90s"][i][2]:<7}{rvol["105s"][i][0]:<4}{rvol["105s"][i][1]}{rvol["105s"][i][2]:<7}{rvol["120s"][i][0]:<4}{rvol["120s"][i][1]}{rvol["120s"][i][2]:<7}{rvol["135s"][i][0]:<4}{rvol["135s"][i][1]}{rvol["135s"][i][2]:<7}')
+		elif len(rvol['history']) == 9:  # 120s
 			for i in range(len(tickers)):
-				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["90s"][i][0]:<4}{rvol["90s"][i][1]}{rvol["90s"][i][2]:<7}{rvol["2m"][i][0]:<4}{rvol["2m"][i][1]}{rvol["2m"][i][2]:<7}{rvol["3m"][i][0]:<4}{rvol["3m"][i][1]}{rvol["3m"][i][2]:<7}{rvol["4m"][i][0]:<4}{rvol["4m"][i][1]}{rvol["4m"][i][2]:<7}{rvol["5m"][i][0]:<4}{rvol["5m"][i][1]}{rvol["5m"][i][2]:<7}')
-		elif len(rvol['history']) == 9 or len(rvol['history']) == 10:  # 4m
+				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["15s"][i][0]:<4}{rvol["15s"][i][1]}{rvol["15s"][i][2]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["45s"][i][0]:<4}{rvol["45s"][i][1]}{rvol["45s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["75s"][i][0]:<4}{rvol["75s"][i][1]}{rvol["75s"][i][2]:<7}{rvol["90s"][i][0]:<4}{rvol["90s"][i][1]}{rvol["90s"][i][2]:<7}{rvol["105s"][i][0]:<4}{rvol["105s"][i][1]}{rvol["105s"][i][2]:<7}{rvol["120s"][i][0]:<4}{rvol["120s"][i][1]}{rvol["120s"][i][2]:<7}')
+		elif len(rvol['history']) == 8:  # 105s
 			for i in range(len(tickers)):
-				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["90s"][i][0]:<4}{rvol["90s"][i][1]}{rvol["90s"][i][2]:<7}{rvol["2m"][i][0]:<4}{rvol["2m"][i][1]}{rvol["2m"][i][2]:<7}{rvol["3m"][i][0]:<4}{rvol["3m"][i][1]}{rvol["3m"][i][2]:<7}{rvol["4m"][i][0]:<4}{rvol["4m"][i][1]}{rvol["4m"][i][2]:<7}')
-		elif len(rvol['history']) == 7 or len(rvol['history']) == 8:  # 3m
+				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["15s"][i][0]:<4}{rvol["15s"][i][1]}{rvol["15s"][i][2]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["45s"][i][0]:<4}{rvol["45s"][i][1]}{rvol["45s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["75s"][i][0]:<4}{rvol["75s"][i][1]}{rvol["75s"][i][2]:<7}{rvol["90s"][i][0]:<4}{rvol["90s"][i][1]}{rvol["90s"][i][2]:<7}{rvol["105s"][i][0]:<4}{rvol["105s"][i][1]}{rvol["105s"][i][2]:<7}')
+		elif len(rvol['history']) == 7:  # 90s
 			for i in range(len(tickers)):
-				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["90s"][i][0]:<4}{rvol["90s"][i][1]}{rvol["90s"][i][2]:<7}{rvol["2m"][i][0]:<4}{rvol["2m"][i][1]}{rvol["2m"][i][2]:<7}{rvol["3m"][i][0]:<4}{rvol["3m"][i][1]}{rvol["3m"][i][2]:<7}')
-		elif len(rvol['history']) == 5 or len(rvol['history']) == 6:  # 2m
+				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["15s"][i][0]:<4}{rvol["15s"][i][1]}{rvol["15s"][i][2]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["45s"][i][0]:<4}{rvol["45s"][i][1]}{rvol["45s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["75s"][i][0]:<4}{rvol["75s"][i][1]}{rvol["75s"][i][2]:<7}{rvol["90s"][i][0]:<4}{rvol["90s"][i][1]}{rvol["90s"][i][2]:<7}')
+		elif len(rvol['history']) == 6:  # 75s
 			for i in range(len(tickers)):
-				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["90s"][i][0]:<4}{rvol["90s"][i][1]}{rvol["90s"][i][2]:<7}{rvol["2m"][i][0]:<4}{rvol["2m"][i][1]}{rvol["2m"][i][2]:<7}')
-		elif len(rvol['history']) == 4:  # 90s
+				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["15s"][i][0]:<4}{rvol["15s"][i][1]}{rvol["15s"][i][2]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["45s"][i][0]:<4}{rvol["45s"][i][1]}{rvol["45s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["75s"][i][0]:<4}{rvol["75s"][i][1]}{rvol["75s"][i][2]:<7}')
+		elif len(rvol['history']) == 5:  # 60s
 			for i in range(len(tickers)):
-				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}{rvol["90s"][i][0]:<4}{rvol["90s"][i][1]}{rvol["90s"][i][2]:<7}')
-		elif len(rvol['history']) == 3:  # 60s
+				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["15s"][i][0]:<4}{rvol["15s"][i][1]}{rvol["15s"][i][2]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["45s"][i][0]:<4}{rvol["45s"][i][1]}{rvol["45s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}')
+		elif len(rvol['history']) == 4:  # 45s
 			for i in range(len(tickers)):
-				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["60s"][i][0]:<4}{rvol["60s"][i][1]}{rvol["60s"][i][2]:<7}')
-		elif len(rvol['history']) == 2:  # 30s
+				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["15s"][i][0]:<4}{rvol["15s"][i][1]}{rvol["15s"][i][2]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}{rvol["45s"][i][0]:<4}{rvol["45s"][i][1]}{rvol["45s"][i][2]:<7}')
+		elif len(rvol['history']) == 3:  # 30s
 			for i in range(len(tickers)):
-				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}')
+				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["15s"][i][0]:<4}{rvol["15s"][i][1]}{rvol["15s"][i][2]:<7}{rvol["30s"][i][0]:<4}{rvol["30s"][i][1]}{rvol["30s"][i][2]:<7}')
+		elif len(rvol['history']) == 2:  # 15s
+			for i in range(len(tickers)):
+				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<7}{rvol["15s"][i][0]:<4}{rvol["15s"][i][1]}{rvol["15s"][i][2]:<7}')
 		else: # elif len(rvol['history']) == 1:
 			for i in range(len(tickers)):
 				print(f'{rvol["current"][i][0]:<5}{rvol["current"][i][1]:<6}')
 
-		print('RVOL{:<8}30s Δ{:<7}60s Δ{:<7}90s Δ{:<7}2m Δ{:<8}3m Δ{:<8}4m Δ{:<8}5m Δ{:<8}7m Δ{:<8}9m Δ{:<8}11m Δ{:<7}13m Δ{:<7}'.format('','','','','','','','','','','',''))
+		print('RVOL{:<8}15s Δ{:<7}30s Δ{:<7}45s Δ{:<7}60s Δ{:<7}75s Δ{:<7}90s Δ{:<7}105s Δ{:<6}120s Δ{:<6}135s Δ{:<6}150s Δ{:<6}165s Δ{:<6}180s Δ{:<6}'.format('','','','','','','','','','','','',''))
+		print('{:<48}1m{:<46}2m{:<46}3m'.format('','',''))
+
+		if len(rvol['15s']) >= 1:
+			if rvol["15s"][-1][2] >= 0.1:
+				print(f'{rvol["15s"][-1][0]} {rvol["15s"][-1][2]} --- Alert --- (⊙.⊙(☉̃ₒ☉)⊙.⊙) --- Alert --- (⊙.⊙(☉̃ₒ☉)⊙.⊙)  --- Alert --- (⊙.⊙(☉̃ₒ☉)⊙.⊙)\n')
 
 
 		# Debug 
@@ -257,7 +272,7 @@ if args['sizzle_scanner']:
 		# print(f'ʕಠಿᴥಠʔ RVOL is {rvol["30s"]} --- Type: {type(rvol["30s"])} --- Length: {len(rvol["30s"])}\n')
 
 		# Wait
-		wait_seconds = 30
+		wait_seconds = 15
 		elapsed_minutes = ((len(rvol['history'])-1) * wait_seconds) / 60 
 		for i in range(0, wait_seconds+1):
 			stdout.write('\r')

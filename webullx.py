@@ -12,7 +12,8 @@ ap.add_argument('-gat', '--get_access_token', action='store_true')
 ap.add_argument('-rat', '--refresh_access_token', action='store_true')
 ap.add_argument('-gco', '--get_current_orders', action='store_true')
 ap.add_argument('-gba', '--get_bid_ask', nargs=1, metavar=['TICKER'])
-ap.add_argument('-place_order', '--place_order', nargs=1, metavar=['TICKER'])
+ap.add_argument('-to', '--test_order', nargs=1, metavar=['TICKER'])
+ap.add_argument('-po', '--place_order', nargs=1, metavar=['TICKER'])
 
 args = vars(ap.parse_args())
 print(f'args --- {args}\n')
@@ -102,6 +103,42 @@ if args['get_bid_ask']:
 	print(f'ᶘಠᴥಠᶅ {ticker} Bid Price: {bid_price}')
 
 
+
+'''
+
+Test Order
+
+'''
+
+if args['test_order']:
+	ticker = args['test_order'][0]
+
+
+	id_response = wb.get_account_id()
+	token_response = wb.get_trade_token(config.WEBULL_TRADE_TOKEN)
+	print(f'ᶘಠᴥಠᶅ ID Response is {id_response}')
+	print(f'ᶘಠᴥಠᶅ Token Response is {token_response}')
+
+	quote = wb.get_quote(stock=ticker)
+	# print(f'ᶘಠᴥಠᶅ Quote is {quote}')
+
+	ask_price = float(quote['depth']['ntvAggAskList'][0]['price'])
+	bid_price = float(quote['depth']['ntvAggBidList'][0]['price'])
+	order_price = 1
+	# order_price = round((bid_price + ask_price) / 2, 2)
+	print(f'ᶘಠᴥಠᶅ {ticker} Ask Price: {ask_price}')
+	print(f'ᶘಠᴥಠᶅ {ticker} Bid Price: {bid_price}')
+	print(f'ᶘಠᴥಠᶅ Order Price: {order_price}')
+
+	qty = 1
+	print(f'Buying {qty} Shares of {ticker} at {order_price}')
+
+	response = wb.place_order(stock=ticker, price=order_price, action='BUY', orderType='LMT', enforce='GTC', quant=qty)
+	print(f'Broker Response {response}')
+
+
+
+
 '''
 
 Place Order
@@ -110,22 +147,23 @@ Place Order
 
 if args['place_order']:
 	ticker = args['place_order'][0]
-	quote = wb.get_quote(stock=ticker)
-	# print(f'ᶘಠᴥಠᶅ Quote is {quote}')
-
-	ask_price = float(quote['depth']['ntvAggAskList'][0]['price'])
-	bid_price = float(quote['depth']['ntvAggBidList'][0]['price'])
-	order_price = round((bid_price + ask_price) / 2, 2)
-	print(f'ᶘಠᴥಠᶅ {ticker} Ask Price: {ask_price}')
-	print(f'ᶘಠᴥಠᶅ {ticker} Bid Price: {bid_price}')
-	print(f'ᶘಠᴥಠᶅ Order Price: {order_price}')
-
+	
 	id_response = wb.get_account_id()
 	token_response = wb.get_trade_token(config.WEBULL_TRADE_TOKEN)
 	# print(f'ᶘಠᴥಠᶅ ID Response is {id_response}')
 	# print(f'ᶘಠᴥಠᶅ Token Response is {token_response}')
 
-	qty = int(6200/order_price)
+	quote = wb.get_quote(stock=ticker)
+	# print(f'ᶘಠᴥಠᶅ Quote is {quote}')
+	ask_price = float(quote['depth']['ntvAggAskList'][0]['price'])
+	bid_price = float(quote['depth']['ntvAggBidList'][0]['price'])
+	# order_price = bid_price
+	order_price = round((bid_price + ask_price) / 2, 2)
+	print(f'ᶘಠᴥಠᶅ {ticker} Ask Price: {ask_price}')
+	print(f'ᶘಠᴥಠᶅ {ticker} Bid Price: {bid_price}')
+	print(f'ᶘಠᴥಠᶅ Order Price: {order_price}')
+
+	qty = int(5000/order_price)
 	print(f'Buying {qty} Shares of {ticker} at {order_price}')
 
 	response = wb.place_order(stock=ticker, price=order_price, action='BUY', orderType='LMT', enforce='GTC', quant=qty)

@@ -4,8 +4,10 @@ tickers['foobar'] = ['QQQ', 'IWM', 'EEM', 'A', 'AAP', 'ABBV', 'SPY', 'MSFT', 'AA
 
 tickers['stocktwits'] = [
 
+'BIMI', 'PLAG', 
 'RHE','WISA','GMBL', 'CLEU', 'WAFU', 'PXS',
 'NLSP', 'JOB', 'CLOV', 'GEVO', 'GTBP', 'WIMI',
+'SNMP', 
 
 ]
 
