@@ -3,8 +3,8 @@ from pandas import DataFrame
 from time import sleep
 from sys import stdout
 
-import robin_stocks as r  # package name differs with version
-#import robin_stocks.robinhood as r
+# import robin_stocks as r  # package name differs with version
+import robin_stocks.robinhood as r
 
 # local imports
 import config
@@ -19,6 +19,7 @@ ap = ArgumentParser()
 # Add the arguments to the parser
 ap.add_argument('-i', '--info', nargs='+', metavar=['TICKERS'])
 ap.add_argument('-vc', '--volume_checker', action='store_true')
+ap.add_argument('-vh', '--volume_history', action='store_true')
 ap.add_argument('-ss', '--sizzle_scanner', action='store_true')
 
 # Parse user arguments
@@ -38,6 +39,7 @@ if args['info']:
 
 	# Get Fundamentals
 	fundementals = r.stocks.get_fundamentals(tickers)
+	print(f'ʕಠಿᴥಠʔ Fundamentals {fundementals}')
 	for f in fundementals:
 		data.append({key: f[key] for key in f.keys() & {'market_cap', 'shares', 'float', 'volume', 'average_volume', 'open'}})
 
@@ -86,6 +88,48 @@ if args['volume_checker']:
 
 	df_filtered = df[df["average_volume"] < 50000]
 	print(df_filtered['symbol'].tolist())
+
+
+
+'''
+Get Volume History Maximum
+'''
+
+if args['volume_history']:
+
+	tickers = watchlists.tickers['foobar']
+	volume_history = {}
+	query_size = 75
+	query_list = []
+	for i in range(0, len(tickers), query_size):
+		query_list.append(tickers[i:i+query_size])
+
+	# Get Volume History
+	historicals_5min_week = []
+	historicals_hour_month = []
+	for i, q in enumerate(query_list):
+		print(f'Requesting Volume History Query List {i+1} of {len(query_list)}')
+		
+		history = r.stocks.get_stock_historicals(q, interval='5minute', span='week')
+		for h in history:
+			historicals_5min_week.append({key: h[key] for key in h.keys() & {'begins_at', 'symbol', 'volume', 'session'}})
+			
+		history = r.stocks.get_stock_historicals(q, interval='hour', span='month')
+		for h in history:
+			historicals_hour_month.append({key: h[key] for key in h.keys() & {'begins_at', 'symbol', 'volume', 'session'}})
+		
+	df_5min_week = DataFrame.from_dict(historicals_5min_week)	
+	df_hour_month = DataFrame.from_dict(historicals_hour_month)
+
+	print(df_hour_month)
+
+	# Get Max Volume for Each Timeframe
+	for t in tickers:
+		max_5min_week = df_5min_week[df_5min_week["symbol"] == t].max().to_dict()['volume']
+		max_hour_month = df_hour_month[df_hour_month["symbol"] == t].max().to_dict()['volume']
+		volume_history[t] = [max_5min_week, max_hour_month]
+
+	print(volume_history)
 
 
 

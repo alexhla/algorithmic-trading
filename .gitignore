@@ -1,6 +1,7 @@
 # project config file
 *config.py
 data/
+sec-edgar-filings/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

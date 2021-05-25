@@ -1,6 +1,6 @@
 tickers = {}
 
-tickers['foobar'] = ['QQQ', 'IWM', 'EEM', 'A', 'AAP', 'ABBV', 'SPY', 'MSFT', 'AAPL', 'TSLA']
+tickers['foobar'] = ['UONE', 'FTI', 'UUU', 'MDLY', 'VVPR', 'ABBV', 'SPY', 'MSFT', 'AAPL', 'TSLA']
 
 tickers['stocktwits'] = [
 

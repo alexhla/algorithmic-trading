@@ -10,6 +10,20 @@ ap.add_argument('-gma', '--get_mfa', action='store_true')
 ap.add_argument('-gsq', '--get_security_question', action='store_true')
 ap.add_argument('-gat', '--get_access_token', action='store_true')
 ap.add_argument('-rat', '--refresh_access_token', action='store_true')
+
+
+ap.add_argument('-ga', '--get_analysis', nargs=1, metavar=['TICKER'])
+ap.add_argument('-gcf', '--get_capital_flow', nargs=1, metavar=['TICKER'])
+ap.add_argument('-geh', '--get_etf_holding', nargs=1, metavar=['TICKER'])
+ap.add_argument('-gih', '--get_institutional_holding', nargs=1, metavar=['TICKER'])
+
+ap.add_argument('-gf', '--get_financials', nargs=1, metavar=['TICKER'])
+ap.add_argument('-gsi', '--get_short_interest', nargs=1, metavar=['TICKER'])
+
+
+
+
+
 ap.add_argument('-gco', '--get_current_orders', action='store_true')
 ap.add_argument('-gba', '--get_bid_ask', nargs=1, metavar=['TICKER'])
 ap.add_argument('-to', '--test_order', nargs=1, metavar=['TICKER'])
@@ -66,6 +80,98 @@ if args['refresh_access_token']:
 	response = wb.refresh_login()
 	print(response)
 
+
+
+
+
+'''
+
+Get Analysis
+
+'''
+
+if args['get_analysis']:
+	ticker = args['get_analysis'][0]
+	analysis = wb.get_analysis(stock=ticker)
+	print(f'ᶘಠᴥಠᶅ Analysis is {analysis}')
+
+
+
+'''
+
+Get Capital Flow
+
+'''
+
+if args['get_capital_flow']:
+	ticker = args['get_capital_flow'][0]
+	capital_flow = wb.get_capital_flow(stock=ticker)
+	print(f'ᶘಠᴥಠᶅ Capital Flow is {capital_flow}')
+
+
+
+
+'''
+
+Get ETF Holding
+
+'''
+
+if args['get_etf_holding']:
+	ticker = args['get_etf_holding'][0]
+	etf_holding = wb.get_etf_holding(stock=ticker)
+	print(f'ᶘಠᴥಠᶅ ETF Holding is {etf_holding}')
+
+
+
+
+
+'''
+
+Get Institutional Holding
+
+'''
+
+if args['get_institutional_holding']:
+	ticker = args['get_institutional_holding'][0]
+	institutional_holding = wb.get_institutional_holding(stock=ticker)
+	print(f'ᶘಠᴥಠᶅ Institutional Holding is {institutional_holding}')
+
+
+
+
+
+'''
+
+Get Financials
+
+'''
+
+if args['get_financials']:
+	ticker = args['get_financials'][0]
+	financials = wb.get_financials(stock=ticker)
+	# print(f'ᶘಠᴥಠᶅ Financials is {financials}')
+
+	for f in financials:
+		for item in financials[f]:
+			print(f'{item}\n\n')
+
+
+
+'''
+
+Get Short Interest
+
+'''
+
+if args['get_short_interest']:
+	ticker = args['get_short_interest'][0]
+	short_interest = wb.get_short_interest(stock=ticker)
+	print(f'ᶘಠᴥಠᶅ Short Interest Holding is {short_interest}')
+
+
+
+
 '''
 
 Get Current Orders
@@ -91,7 +197,7 @@ Get Bid Ask
 '''
 
 if args['get_bid_ask']:
-	ticker = args['place_order'][0]
+	ticker = args['get_bid_ask'][0]
 	quote = wb.get_quote(stock=ticker)
 	print(f'ᶘಠᴥಠᶅ Quote is {quote}')
 
@@ -116,8 +222,8 @@ if args['test_order']:
 
 	id_response = wb.get_account_id()
 	token_response = wb.get_trade_token(config.WEBULL_TRADE_TOKEN)
-	print(f'ᶘಠᴥಠᶅ ID Response is {id_response}')
-	print(f'ᶘಠᴥಠᶅ Token Response is {token_response}')
+	# print(f'ᶘಠᴥಠᶅ ID Response is {id_response}')
+	# print(f'ᶘಠᴥಠᶅ Token Response is {token_response}')
 
 	quote = wb.get_quote(stock=ticker)
 	# print(f'ᶘಠᴥಠᶅ Quote is {quote}')
