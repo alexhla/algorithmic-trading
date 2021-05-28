@@ -11,15 +11,14 @@ ap.add_argument('-gsq', '--get_security_question', action='store_true')
 ap.add_argument('-gat', '--get_access_token', action='store_true')
 ap.add_argument('-rat', '--refresh_access_token', action='store_true')
 
+ap.add_argument('-ga', '--get_account', action='store_true')
 
-ap.add_argument('-ga', '--get_analysis', nargs=1, metavar=['TICKER'])
+ap.add_argument('-gay', '--get_analysis', nargs=1, metavar=['TICKER'])
 ap.add_argument('-gcf', '--get_capital_flow', nargs=1, metavar=['TICKER'])
 ap.add_argument('-geh', '--get_etf_holding', nargs=1, metavar=['TICKER'])
 ap.add_argument('-gih', '--get_institutional_holding', nargs=1, metavar=['TICKER'])
-
 ap.add_argument('-gf', '--get_financials', nargs=1, metavar=['TICKER'])
 ap.add_argument('-gsi', '--get_short_interest', nargs=1, metavar=['TICKER'])
-
 
 
 
@@ -79,6 +78,39 @@ if args['refresh_access_token']:
 	wb._uuid = config.WEBULL_UUID
 	response = wb.refresh_login()
 	print(response)
+
+
+
+'''
+
+Get Account
+
+'''
+
+if args['get_account']:
+	account = wb.get_account()
+	# print(f'ᶘಠᴥಠᶅ Account is {account}')
+	for x in account:
+
+		if type(account[x]) == str or type(account[x]) == int:
+			print(f'{x}\t{account[x]}\n')
+
+		if type(account[x]) == list:
+			print(f'ᶘಠᴥಠᶅ {x}')
+			if x == 'accounts':
+				for d in account[x]:
+					for k,v in d.items():
+						print(f'{k}\t{v}')	
+			if x == 'positions':
+				for d in account[x]:
+					print('')
+					for k,v in d.items():
+						if k == 'ticker':
+							print(f'ᶘಠᴥಠᶅ\t{v["symbol"]}')
+						if k in ['cost', 'costPrice', 'lastPrice', 'marketValue', 'unrealizedProfitLoss']:
+							print(f'{k}\t{v}')
+
+
 
 
 
@@ -203,7 +235,8 @@ if args['get_bid_ask']:
 
 	ask_price = float(quote['depth']['ntvAggAskList'][0]['price'])
 	bid_price = float(quote['depth']['ntvAggBidList'][0]['price'])
-	order_price = round((bid_price + ask_price) / 2, 2)
+	# order_price = round((bid_price + ask_price) / 2, 2)
+	order_price = bid_price
 	print(f'ᶘಠᴥಠᶅ {ticker} Ask Price: {ask_price}')
 	print(f'ᶘಠᴥಠᶅ {ticker} Mid Price: {order_price}')
 	print(f'ᶘಠᴥಠᶅ {ticker} Bid Price: {bid_price}')
@@ -263,13 +296,13 @@ if args['place_order']:
 	# print(f'ᶘಠᴥಠᶅ Quote is {quote}')
 	ask_price = float(quote['depth']['ntvAggAskList'][0]['price'])
 	bid_price = float(quote['depth']['ntvAggBidList'][0]['price'])
-	# order_price = bid_price
-	order_price = round((bid_price + ask_price) / 2, 2)
+	order_price = bid_price
+	# order_price = round((bid_price + ask_price) / 2, 2)
 	print(f'ᶘಠᴥಠᶅ {ticker} Ask Price: {ask_price}')
 	print(f'ᶘಠᴥಠᶅ {ticker} Bid Price: {bid_price}')
 	print(f'ᶘಠᴥಠᶅ Order Price: {order_price}')
 
-	qty = int(5000/order_price)
+	qty = int(1000/order_price)
 	print(f'Buying {qty} Shares of {ticker} at {order_price}')
 
 	response = wb.place_order(stock=ticker, price=order_price, action='BUY', orderType='LMT', enforce='GTC', quant=qty)
