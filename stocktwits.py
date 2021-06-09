@@ -7,59 +7,44 @@ import json
 
 BASE_URL = 'https://api.stocktwits.com/api/2/'
 ap = ArgumentParser()
-ap.add_argument('-mipscan', '--mrinvestorpro_scanner', action='store_true')
+ap.add_argument('-s', '--scanner', action='store_true')
 
 
 args = vars(ap.parse_args())
 print(f'args --- {args}\n')
 
-'''
+users = ['acinvestorblog', 'mrinvestorpro', 'lukeam',
+		'ProfessorDman1', 'tradexlnc', 'TeamRVR', 'harmongreg',
+		'DekmarTrades', 'SwingThinKing', 'Mrs_BlackInkEconomics',
+		'WallStJesus', 'PLATINUM_TRADES', 'BARNIMAL_',
+		'Dark_Prince', 'ProfitsInYards', 'JSP_Dilution_Player',
+		'StockAuthority', 'RainxMaker', 'CycleTrade', 'CamTheMan_',
+		'BRJP_CALLS', 'Vestorinvest', 'Invest2live', 'FonsieTrader',
+		'iBuyHighSellLow_',
+		]
 
-mrinvestorpro Scanner
+if args['scanner']:
+	symbol_count = {}
 
-'''
-
-if args['mrinvestorpro_scanner']:
-
-	while True:
-		interval = 20
-		url = BASE_URL + 'streams/user/mrinvestorpro.json'
+	for index, user in enumerate(users):
+		print(f'ᶘಠᴥಠᶅ {index} --- {user}')
+		# if index >= 1:
+		# 	break
+		
+		url = BASE_URL + f'streams/user/{user}.json'
 		r = requests.get(url)
 		dict_str = r.content.decode("UTF-8")
 		messages = json.loads(dict_str)['messages']
-		timestamp = datetime.now().replace(second=0, microsecond=0)
-		m_timestamp = datetime.fromisoformat(messages[0]['created_at'][:-1]).replace(second=0, microsecond=0)
-		print(f'ᶘಠᴥಠᶅ The Current Time  \t {timestamp}')
-		print(f'ᶘಠᴥಠᶅ Last Message Time \t {m_timestamp}\n')
-		print(f'ᶘಠᴥಠᶅ Last Message \t {messages[0]["body"]}\n')
-		if timestamp == m_timestamp:
-				if messages[0]['body'][0] != '@':
-					if any(x in m['body'] for x in ['alert', 'Alert', 'ALERT']):
-						unicode_chars = []
-						for char in m['body'][:30]:
-							unicode_chars.append(ord(char))
-							# print(f'ᶘಠᴥಠᶅ {char} \t {ord(char)}')
-						emoji_siren_value = 128680
-						emoji_siren_count = unicode_chars.count(emoji_siren_value) 
-						if emoji_siren_count > 1:
-							print(m['body'])
-							print(f'Emoji Siren Count is {emoji_siren_count}')
-							
-							ticker = ''
-							for index, char in enumerate(m['body']):
-								if index == 0:
-									pass
-								elif char == ' ':
-									break
-								else:
-									ticker = ticker + char
 
-							print(f'Placing Trade for {ticker}')
+		for m in messages:
+			if 'symbols' in m:
+				for d in m['symbols']:
+					print(d['symbol'])
+					if d['symbol'] in symbol_count:
+						symbol_count[d['symbol']] += 1
+					else:
+						symbol_count[d['symbol']] = 1 
 
-		# Wait
-		for i in range(0, interval+1):
-			stdout.write('\r')
-			stdout.write(f'Updating in {interval-i} Seconds...')
-			stdout.flush()
-			sleep(1)
-		print('\nScanning...\n')
+
+	ordered_symbol_count = dict(sorted(symbol_count.items(), key=lambda item:item[1], reverse=True))
+	print(ordered_symbol_count)
