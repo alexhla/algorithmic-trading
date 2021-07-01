@@ -2,13 +2,14 @@ from argparse import ArgumentParser
 from pandas import DataFrame
 from time import sleep
 from sys import stdout
+import csv
 
 # import robin_stocks as r  # package name differs with version
 import robin_stocks.robinhood as r
 
 # local imports
 import config
-import watchlists
+from stocklists import blacklist
 
 # Login to Robinhood
 r.login(config.ROBINHOOD_EMAIL, config.ROBINHOOD_PASSWORD)
@@ -22,9 +23,91 @@ ap.add_argument('-vc', '--volume_checker', action='store_true')
 ap.add_argument('-vh', '--volume_history', action='store_true')
 ap.add_argument('-ss', '--sizzle_scanner', action='store_true')
 
+
+ap.add_argument('-goc', '--get_options_chains', nargs='+', metavar=['TICKERS'])
+
+
 # Parse user arguments
 args = vars(ap.parse_args())
 print(f'args --- {args}\n')
+
+
+test_tickers = ['SPY','TSLA','UUU','RMED','CLVS','CLOV']
+
+
+'''
+
+Info
+
+'''
+
+if args['get_options_chains']:
+
+	tickers = args['get_options_chains']
+	data = []
+
+
+	print(f'Requesting...')
+
+
+	# print('Requesting Options by Expiration...')
+	# options_by_expiration = r.options.find_options_by_expiration(tickers, '2021-06-18')
+	# for index, element in enumerate(options_by_expiration):
+	# 	print(f'ʕಠಿᴥಠʔ  {index} | {element}\n')
+
+	# print('Requesting Options by Expiration and Strike...')
+	# find_options_by_expiration_and_strike = r.options.find_options_by_expiration_and_strike(tickers, '2021-06-18', '7.0000')
+	# for index, element in enumerate(find_options_by_expiration_and_strike):
+	# 	print(f'ʕಠಿᴥಠʔ  {index} | {element}\n')
+
+
+	#### NOT WORKING
+	# print('Requesting Options by find_options_by_specific_profitability...')
+	# find_options_by_specific_profitability = r.options.find_options_by_specific_profitability(tickers, profitFloor=0.0, profitCeiling=0.1)
+	# for index, element in enumerate(find_options_by_specific_profitability):
+	# 	print(f'ʕಠಿᴥಠʔ  {index} | {element}\n')
+
+
+	# print('Requesting Options by Strike...')
+	# find_options_by_strike = r.options.find_options_by_strike(tickers, '6.0000')
+	# for index, element in enumerate(find_options_by_strike):
+	# 	print(f'ʕಠಿᴥಠʔ  {index} | {element}\n')
+
+	# print('Requesting Tradable Options...')
+	# find_tradable_options = r.options.find_tradable_options(tickers[0])
+	# for index, element in enumerate(find_tradable_options):
+	# 	print(f'ʕಠಿᴥಠʔ  {index} | {element}\n')
+
+	# print('Requesting Options Chains...')
+	# get_chains = r.options.get_chains(tickers[0])
+	# print(f'ʕಠಿᴥಠʔ  {get_chains}')
+
+	print('Requesting Option Historicals...')
+	get_option_historicals = r.options.get_option_historicals(tickers[0], expirationDate='2021-06-18', strikePrice='6.0000', optionType='call')
+	for index, element in enumerate(get_option_historicals):
+		print(f'ʕಠಿᴥಠʔ  {index} | {element}\n')
+
+
+	# get_option_historicals
+	# get_option_instrument_data
+	# get_option_market_data
+
+
+
+	# # Merge Info into Single Dictionary
+	# for i, d in enumerate(data):
+	# 	d['ticker'] = tickers[i]
+	# 	d['latest_price'] = latest_price[i]
+
+	# # Compute RVOL
+	# df = DataFrame.from_dict(data)
+	# df['RVOL'] = df['volume'].astype(float) / df['average_volume'].astype(float)
+
+	# # Display Results
+	# for index, row in df.iterrows():
+	# 	print(f'{row}\n')
+
+
 
 '''
 
@@ -60,6 +143,9 @@ if args['info']:
 		print(f'{row}\n')
 
 
+
+
+
 '''
 
 Volume Checker
@@ -68,7 +154,7 @@ Volume Checker
 
 if args['volume_checker']:
 
-	tickers = watchlists.tickers['May2020_HighBetaMicroCap'] + watchlists.tickers['stocktwits']
+	tickers = test_tickers
 	query_size = 100
 	query_list = []
 	for i in range(0, len(tickers), query_size):
@@ -78,16 +164,17 @@ if args['volume_checker']:
 	temp = []
 	for q in query_list:
 		fundementals = r.stocks.get_fundamentals(q)
-		print(fundementals)
+		# print(fundementals)
 		for f in fundementals:
 			temp.append({key: f[key] for key in f.keys() & {'symbol', 'average_volume'}})
 
 	# Convert to Data Frame
 	df = DataFrame.from_dict(temp)
 	df['average_volume'] = df['average_volume'].astype(float)
+	print(df)
 
-	df_filtered = df[df["average_volume"] < 50000]
-	print(df_filtered['symbol'].tolist())
+	# df_filtered = df[df["average_volume"] < 50000]
+	# print(df_filtered['symbol'].tolist())
 
 
 
@@ -96,8 +183,7 @@ Get Volume History Maximum
 '''
 
 if args['volume_history']:
-
-	tickers = watchlists.tickers['foobar']
+	tickers = test_tickers
 	volume_history = {}
 	query_size = 75
 	query_list = []
@@ -141,7 +227,15 @@ Scanner
 
 if args['sizzle_scanner']:
 
-	tickers = watchlists.tickers['May2020_HighBetaMicroCap'] + watchlists.tickers['stocktwits']
+	tickers = []
+	with open('stocktwits_watchlist.tsv', 'r') as in_file:
+		tsv_reader = csv.reader(in_file, delimiter='\t')
+		for row in tsv_reader:
+			print(row)
+			if row[0] not in blacklist:
+				if '.CA' not in row[0]:
+					tickers.append(row[0])
+
 	rvol = {}
 	price = {}
 	rvol['history'] = []

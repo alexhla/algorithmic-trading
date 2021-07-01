@@ -1,14 +1,11 @@
 from argparse import ArgumentParser
-from datetime import datetime
-from time import sleep
-from sys import stdout
 import requests
 import json
+import csv
 
 BASE_URL = 'https://api.stocktwits.com/api/2/'
 ap = ArgumentParser()
 ap.add_argument('-s', '--scanner', action='store_true')
-
 
 args = vars(ap.parse_args())
 print(f'args --- {args}\n')
@@ -20,7 +17,7 @@ users = ['acinvestorblog', 'mrinvestorpro', 'lukeam',
 		'Dark_Prince', 'ProfitsInYards', 'JSP_Dilution_Player',
 		'StockAuthority', 'RainxMaker', 'CycleTrade', 'CamTheMan_',
 		'BRJP_CALLS', 'Vestorinvest', 'Invest2live', 'FonsieTrader',
-		'iBuyHighSellLow_',
+		'iBuyHighSellLow_', 'DaBullRunner',
 		]
 
 if args['scanner']:
@@ -28,7 +25,7 @@ if args['scanner']:
 
 	for index, user in enumerate(users):
 		print(f'ᶘಠᴥಠᶅ {index} --- {user}')
-		# if index >= 1:
+		# if index >= 2:
 		# 	break
 		
 		url = BASE_URL + f'streams/user/{user}.json'
@@ -39,12 +36,21 @@ if args['scanner']:
 		for m in messages:
 			if 'symbols' in m:
 				for d in m['symbols']:
-					print(d['symbol'])
-					if d['symbol'] in symbol_count:
-						symbol_count[d['symbol']] += 1
+
+					ticker = d['symbol']
+					print(ticker)
+
+					if ticker in symbol_count:
+						symbol_count[ticker] += 1
 					else:
-						symbol_count[d['symbol']] = 1 
+						symbol_count[ticker] = 1 
 
 
 	ordered_symbol_count = dict(sorted(symbol_count.items(), key=lambda item:item[1], reverse=True))
-	print(ordered_symbol_count)
+	# for item in ordered_symbol_count.items():
+	# 	print(item)
+
+	with open('stocktwits_watchlist.tsv', 'w') as out_file:
+		tsv_writer = csv.writer(out_file, delimiter='\t')
+		for item in ordered_symbol_count.items():
+			tsv_writer.writerow([item[0], item[1]])

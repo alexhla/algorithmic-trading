@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from webull import webull
+from sys import exit
 import config
 
 wb = webull()
@@ -26,10 +27,14 @@ ap.add_argument('-gsi', '--get_short_interest', nargs=1, metavar=['TICKER'])
 ap.add_argument('-gco', '--get_current_orders', action='store_true')
 ap.add_argument('-gba', '--get_bid_ask', nargs=1, metavar=['TICKER'])
 ap.add_argument('-to', '--test_order', nargs=1, metavar=['TICKER'])
-ap.add_argument('-po', '--place_order', nargs=1, metavar=['TICKER'])
+ap.add_argument('-po', '--place_order', nargs=3, metavar=['ACTION','QUANTITY','TICKER'])
+
+
+
+
 
 args = vars(ap.parse_args())
-print(f'args --- {args}\n')
+# print(f'args --- {args}\n')
 
 '''
 
@@ -195,8 +200,8 @@ Get Short Interest
 if args['get_short_interest']:
 	ticker = args['get_short_interest'][0]
 	short_interest = wb.get_short_interest(stock=ticker)
-	print(f'ᶘಠᴥಠᶅ Short Interest Holding is {short_interest}')
-
+	for index, element in enumerate(short_interest):
+		print(f'ᶘಠᴥಠᶅ  {index} | {element}')
 
 
 
@@ -278,28 +283,33 @@ if args['test_order']:
 
 Place Order
 
+python3 webullx.py --place_order SELL 1 RCON
+
+
 '''
 
 if args['place_order']:
-	ticker = args['place_order'][0]
-	
+	action = args['place_order'][0]
+	if action not in ['BUY', 'SELL']:
+		print(f'ᶘಠᴥಠᶅ Invalid Action Error: {action}')
+		exit(0)
+	qty = int(args['place_order'][1])
+	ticker = args['place_order'][2]
+
 	id_response = wb.get_account_id()
 	token_response = wb.get_trade_token(config.WEBULL_TRADE_TOKEN)
-	# print(f'ᶘಠᴥಠᶅ ID Response is {id_response}')
-	# print(f'ᶘಠᴥಠᶅ Token Response is {token_response}')
+	print(f'ᶘಠᴥಠᶅ ID Response is {id_response}')
+	print(f'ᶘಠᴥಠᶅ Token Response is {token_response}')
 
 	quote = wb.get_quote(stock=ticker)
 	# print(f'ᶘಠᴥಠᶅ Quote is {quote}')
-	ask_price = float(quote['depth']['ntvAggAskList'][0]['price'])
-	bid_price = float(quote['depth']['ntvAggBidList'][0]['price'])
-	order_price = bid_price
-	# order_price = round((bid_price + ask_price) / 2, 2)
+	ask_price = float(quote['askList'][0]['price'])
+	bid_price = float(quote['bidList'][0]['price'])
+	order_price = round((bid_price + ask_price) / 2, 2)
 	print(f'ᶘಠᴥಠᶅ {ticker} Ask Price: {ask_price}')
 	print(f'ᶘಠᴥಠᶅ {ticker} Bid Price: {bid_price}')
 	print(f'ᶘಠᴥಠᶅ Order Price: {order_price}')
+	print(f'{action} {qty} Shares of {ticker} at {order_price}')
 
-	qty = int(1000/order_price)
-	print(f'Buying {qty} Shares of {ticker} at {order_price}')
-
-	response = wb.place_order(stock=ticker, price=order_price, action='BUY', orderType='LMT', enforce='GTC', quant=qty)
+	response = wb.place_order(stock=ticker, price=order_price, action=action, orderType='LMT', enforce='GTC', quant=qty)
 	print(f'Broker Response {response}')
