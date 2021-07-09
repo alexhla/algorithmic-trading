@@ -286,6 +286,17 @@ Place Order
 python3 webullx.py --place_order SELL 1 RCON
 
 
+
+        price: float (LMT / STP LMT Only)
+        action: BUY / SELL / SHORT
+        ordertype : LMT / MKT / STP / STP LMT / STP TRAIL
+        timeinforce:  GTC / DAY / IOC
+        outsideRegularTradingHour: True / False
+        stpPrice: float (STP / STP LMT Only)
+        trial_value: float (STP TRIAL Only)
+        trial_type: DOLLAR / PERCENTAGE (STP TRIAL Only)
+
+
 '''
 
 if args['place_order']:
