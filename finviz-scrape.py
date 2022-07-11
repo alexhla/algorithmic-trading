@@ -1,9 +1,10 @@
+from csv import writer
+from json import loads
 from bs4 import BeautifulSoup as soup
 from urllib.request import Request, urlopen
-from json import loads
-from csv import writer
 
-
+# Declare variables
+tickers = set()
 priceData = {}
 data = {'ticker':None,
 		'lastOpen':None,
@@ -80,25 +81,33 @@ data = {'ticker':None,
 		'Change':None,
 	}
 
+# Get tickers
+with open('tickers-nasdaq-07-2022.csv', 'r') as file:
+	for index, row in enumerate(file):
+		if index == 0:
+			continue
+		
+		ticker = row.split(',')[0]
+		
+		if '^' in ticker or '/' in ticker:
+			continue
+		
+		tickers.add(ticker)
+
 # Open TSV file
 with open('finviz.tsv', 'w+') as file:
 	tsv_writer = writer(file, delimiter='\t')
 	tsv_writer.writerow(data.keys())
-	symbols = ['DRMA','RCON','THMO']
-	for symbol in symbols:
-		print (f'\nGetting data for {symbol}...\n')
-
-		# Set up scraper
-		url = f'http://finviz.com/quote.ashx?t={symbol}'
+	for ticker in tickers:
+		print (f'\nScraping {ticker}...\n')
+		url = f'http://finviz.com/quote.ashx?t={ticker}'
 		req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-		webpage = urlopen(req).read()
+		try:
+			webpage = urlopen(req).read()
+		except Exception as e:
+			print(f'{ticker} --- {e}')
+			continue
 		soupObject = soup(webpage, "html.parser")
-
-		# Read from file
-		# url = f'finviz.html'
-		# page = open(url)
-		# soup = soup(page.read(), "html.parser")
-		# script = soup.findAll('script')
 
 		# Parse Javascript
 		soupScript = soupObject.find_all('script')
@@ -116,10 +125,12 @@ with open('finviz.tsv', 'w+') as file:
 						right_braces.append(index)
 
 				priceData = loads(rowText[left_braces[1]:right_braces[-2]+1])
+				if priceData['lastOpen'] == None or priceData['lastClose'] == None:
+					print('skipping')
+					continue
 				data['ticker'] = priceData['ticker']
 				data['lastOpen'] = round(priceData['lastOpen'], 2)
 				data['lastClose'] = round(priceData['lastClose'],2)
-
 
 		# Parse HTML
 		soupText = soupObject.get_text().splitlines()
@@ -134,8 +145,3 @@ with open('finviz.tsv', 'w+') as file:
 		# Print to Terminal
 		for key in data:
 			print(f'{key:<15}{data[key]}')
-
-
-		# print(f'soup is len {len(soup)} and type {type(soup)}')
-		# soup = soup.clear()
-		# print(f'AFTER CLEAR soup is len {len(soup)} and type {type(soup)}')
