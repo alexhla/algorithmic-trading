@@ -66,7 +66,7 @@ data = {'ticker':None,
 		'RSI (14)':None,
 		'Rel Volume':None,
 		'Avg Volume':None,
-		'Volume':None,
+		# 'Volume':None,
 		'Perf Week':None,
 		'Perf Month':None,
 		'Perf Quarter':None,
@@ -78,7 +78,7 @@ data = {'ticker':None,
 		'Volatility':None,
 		'Prev Close':None,
 		'Price':None,
-		'Change':None,
+		# 'Change':None,
 	}
 
 # Get tickers
@@ -145,3 +145,7 @@ with open('finviz.tsv', 'w+') as file:
 		# Print to Terminal
 		for key in data:
 			print(f'{key:<15}{data[key]}')
+
+		# Print to Terminal
+		for key in data:
+			data[key] = None
